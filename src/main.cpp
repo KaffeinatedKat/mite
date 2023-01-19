@@ -54,25 +54,6 @@ int main(int argc, char *argv[]) {
             Edit.commandMode(File, Screen, Cursor, c);
         }
 
-        /* else if (c == 'i') {
-            Edit.Mode = Edit.insert;
-        } else if (c == 'w') {
-            File.buildString(File);
-        } else if (c == 'r') {
-            File.buildVector(File);
-        } else if (c == 'l') {
-            Screen.scrollIndex += 1;
-            Cursor.column += 1;
-        } else if (c == 'h') {
-            if (Screen.scrollIndex > 0) {
-                Screen.scrollIndex -= 1;
-                Cursor.column -= 1;
-            }
-        } else if (c == '$') {
-            printf("\n");
-        }
-        */
-
         printf("\033[H\033[J");
         Screen.print(Screen, File, Mode);
         printf("\033[%d;%dH", Cursor.row, Cursor.column);
