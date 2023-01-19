@@ -49,8 +49,7 @@ int main(int argc, char *argv[]) {
         if (c == 27) { //  Command mode on ESC
             Mode = command;
         } else if (Mode == insert) {
-            Edit.insertMode(File, Screen, c, Cursor.column - Cursor.offset);
-            Cursor.column++;
+            Edit.insertMode(File, Screen, Cursor, c);
         } else if (Mode == command) {
             Edit.commandMode(File, Screen, Cursor, c);
         }
@@ -80,3 +79,6 @@ int main(int argc, char *argv[]) {
         std::fflush(stdout);
     }
 }
+
+
+

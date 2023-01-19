@@ -15,17 +15,21 @@ struct edit {
     
 
 
-    void insertMode(file &File, screen &Screen, char c, int index) {
+    void insertMode(file &File, screen &Screen, cursor &Cursor, char c) {
         std::string currentLine = File.vect[Screen.cursorPos - 1];
         std::string lineBegin;
         std::string lineEnd;
+        int index = Cursor.column - Cursor.offset;
 
-        lineBegin = currentLine.substr(0, index);
-        lineEnd = currentLine.substr(index);
-
-        lineBegin.push_back(c);
-
-        File.vect[Screen.cursorPos - 1] = lineBegin + lineEnd;
+        if (c == 127) {
+            File.vect[Screen.cursorPos - 1].erase(index, 1);
+        } else {
+            lineBegin = currentLine.substr(0, index);
+            lineEnd = currentLine.substr(index);
+            lineBegin.push_back(c);
+            File.vect[Screen.cursorPos - 1] = lineBegin + lineEnd;
+            Cursor.column++;
+        }
     }
 
     void commandMode(file &File, screen &Screen, cursor &Cursor, char c) {
