@@ -40,6 +40,8 @@ struct edit {
     void commandMode(file &File, screen &Screen, cursor &Cursor, char c) {
         if (c == 'i') {
            Mode = insert; 
+        } else if (c == 'x') {
+            File.vect[Screen.cursorPos - 1].erase(Cursor.column - Cursor.offset, 1);
         } else if (c == 'j') {
             if (!(Cursor.row >= Screen.verticalSize)) { Cursor.row += 1; }
             Screen.cursorPos += 1;
