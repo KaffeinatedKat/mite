@@ -35,7 +35,7 @@ struct edit {
             if (!(Cursor.row >= Screen.verticalSize)) { Cursor.row += 1; }
             Screen.cursorPos += 1;
         } else if (c == 'k') {
-            if (!(Cursor.row == 0)) { Cursor.row -= 1; }
+            if (!(Cursor.row <= 1)) { Cursor.row -= 1; }
             if (!(Screen.cursorPos <= 1)) { Screen.cursorPos -= 1; }
         } else if (c == 'w') {
             File.writeFile();
