@@ -21,8 +21,13 @@ struct edit {
         std::string lineEnd;
         int index = Cursor.column - Cursor.offset;
 
-        if (c == 127) {
-            File.vect[Screen.cursorPos - 1].erase(index, 1);
+        if (c == 127) { //  Backspace
+            File.vect[Screen.cursorPos - 1].erase(index - 1, 1);
+            Cursor.column--;
+        } else if (c == 10) {
+            File.vect.insert(File.vect.begin() + Screen.cursorPos, "");
+            Cursor.row++;
+            Cursor.column = Cursor.offset;
         } else {
             lineBegin = currentLine.substr(0, index);
             lineEnd = currentLine.substr(index);
