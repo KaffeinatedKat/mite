@@ -20,7 +20,7 @@ struct screen {
     std::string modes[2] = {"command", "insert"};
     int verticalSize = 10;
     int horizontalSize = 20;
-    int cursorLine = 1;
+    int cursorLine = 0;
     int cursorChar = 0;
     int scrollIndex = 0;
     int topLine = 1;
@@ -47,7 +47,7 @@ struct screen {
                 continue;
             }
 
-            if (line == cursorLine) {
+            if (line == cursorLine + 1) {
                 highlight = "\x1b[40m";
             }
             if (it.length() > rightLine - horizontalSize) {
