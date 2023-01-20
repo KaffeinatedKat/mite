@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdio>
+#include <ios>
 #include <iostream>
 
 #include "file.cpp"
@@ -19,23 +20,25 @@ struct screen {
     std::string modes[2] = {"command", "insert"};
     int verticalSize = 10;
     int horizontalSize = 20;
-    int cursorPos = 1;
+    int cursorLine = 1;
+    int cursorChar = 0;
     int scrollIndex = 0;
     int topLine = 1;
     int bottomLine = verticalSize;
+    int leftLine = 0;
+    int rightLine = horizontalSize;
 
-    void print(screen &self, file File, int m) {
+    void print(file File, int m) {
         int line = 0;
-        int linesToPrint = self.verticalSize - 1;
         std::string highlight = "";
 
         for (auto& it : File.vect) {
             line++;
 
-            if (cursorPos > bottomLine) { //  Scrolling down
+            if (cursorLine > bottomLine) { //  Scrolling down
                 bottomLine++;
                 topLine++;
-            } else if (cursorPos < topLine) { //  Scrolling up
+            } else if (cursorLine < topLine) { //  Scrolling up
                 bottomLine--;
                 topLine--;
             }
@@ -44,13 +47,12 @@ struct screen {
                 continue;
             }
 
-
-            if (line == self.cursorPos) {
+            if (line == cursorLine) {
                 highlight = "\x1b[40m";
             }
-            if (it.length() > scrollIndex) {
+            if (it.length() > rightLine - horizontalSize) {
 
-                printf("%s%-5d| %s\x1b[0m\n", highlight.c_str(), line, it.substr(scrollIndex, horizontalSize).c_str());
+                printf("%s%-5d| %s\x1b[0m\n", highlight.c_str(), line, it.substr(rightLine - horizontalSize, horizontalSize).c_str());
             } else {
                 printf("%s%-5d| \x1b[0m\n", highlight.c_str(), line);
             }

@@ -32,16 +32,16 @@ int main(int argc, char *argv[]) {
     std::string mode;
     std::string temp;
 
+    cursor Cursor;
     file File;
     screen Screen;
     edit Edit;
-    cursor Cursor;
     Mode = command;
     int x = 1;
 
     File.filePath = argv[1];
     File.openFile();
-    Screen.print(Screen, File, Mode);
+    Screen.print(File, Mode);
     Cursor.move();
     std::fflush(stdout);
 
@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
         }
 
         printf("\033[H\033[J");
-        Screen.print(Screen, File, Mode);
-        printf("\033[%d;%dH", Cursor.row, Cursor.column);
+        Screen.print(File, Mode);
+        Cursor.move();
         std::fflush(stdout);
     }
 }
