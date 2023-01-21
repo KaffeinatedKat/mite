@@ -22,7 +22,7 @@ struct edit {
         std::string lineEnd;
         int index = Cursor.column - Cursor.offset;
         int undoInsert;
-        char character = File.vect[Screen.cursorLine][index - 1];
+        char character = File.vect[Screen.cursorLine][index];
 
         if (c == 127) { //  Backspace
             undoInsert = 1;
@@ -47,9 +47,11 @@ struct edit {
         }
 
         //  Create undo instruction, [line, index, (insert), char]
-        action = {Screen.cursorLine, index - 1, undoInsert, character};
+        index = Cursor.column - Cursor.offset;
+        character = File.vect[Screen.cursorLine][index - 1];
+        action = {Screen.cursorLine, index, undoInsert, character};
+        if (!(++undoIndex == undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
         undoStack.push_back(action);
-        undoIndex++;
     }
 
     void commandMode(file &File, screen &Screen, cursor &Cursor, char c) {
@@ -76,7 +78,7 @@ struct edit {
 
         } else if (c == 't') {
             for (auto& it : undoStack) {
-                printf("[%d, %d, %d, %d]\n", it[0], it[1], it[2], it[3]);
+                printf("[%d, %d, %d, %c]\n", it[0], it[1], it[2], it[3]);
             }
             exit(0);
         } else if (c == 'u') {
@@ -89,21 +91,21 @@ struct edit {
     void undo(file &File, screen &Screen, cursor &Cursor) {
         //  undoStack format [line, index, action (0-1), char]
         std::vector<int> action = undoStack[undoIndex];
-        std::string lineBegin = File.vect[Screen.cursorLine].substr(0, action[1]);
-        std::string lineEnd = File.vect[Screen.cursorLine].substr(action[1]);
+        std::string lineBegin = File.vect[action[0]].substr(0, action[1]);
+        std::string lineEnd = File.vect[action[0]].substr(action[1]);
 
         if (action[2] == 1) {  //  Insert a char
             lineBegin.push_back(action[3]);
             Cursor.column++;
 
         } else if (action[2] == 0) { //  Delete a char
-            lineBegin = File.vect[Screen.cursorLine].substr(0, action[1] + 2);
-            lineEnd = File.vect[Screen.cursorLine].substr(action[1] + 2);
+            lineBegin = File.vect[action[0]].substr(0, action[1]);
+            lineEnd = File.vect[action[0]].substr(action[1]);
             lineBegin.pop_back();
             Cursor.column--;
 
         }
-        File.vect[Screen.cursorLine] = lineBegin + lineEnd;
+        File.vect[action[0]] = lineBegin + lineEnd;
         undoIndex--;
     }
 };
