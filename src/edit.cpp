@@ -93,6 +93,9 @@ struct edit {
         std::vector<int> action = undoStack[undoIndex];
         std::string lineBegin = File.vect[action[0]].substr(0, action[1]);
         std::string lineEnd = File.vect[action[0]].substr(action[1]);
+        Cursor.row = action[0] + 1;
+        Cursor.column = Cursor.offset + action[1];
+        Screen.cursorLine = Cursor.row - 1;
 
         if (action[2] == 1) {  //  Insert a char
             lineBegin.push_back(action[3]);
