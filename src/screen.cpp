@@ -43,6 +43,14 @@ struct screen {
                 topLine--;
             }
 
+            if (cursorChar > rightLine) {
+                rightLine++;
+                leftLine++;
+            } else if (cursorChar < leftLine) {
+                rightLine--;
+                leftLine--;
+            }
+
             if (line < topLine) {
                 continue;
             }

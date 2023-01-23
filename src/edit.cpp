@@ -49,6 +49,7 @@ struct edit {
             lineEnd = currentLine.substr(index);
             lineBegin.push_back(c);
             File.vect[Screen.cursorLine] = lineBegin + lineEnd;
+            Screen.cursorChar++;
             Cursor.column++;
 
         }
@@ -83,6 +84,16 @@ struct edit {
             if (!(Cursor.row <= 1)) { Cursor.row -= 1; }
             if (!(Screen.cursorLine <= 1)) { Screen.cursorLine -= 1; }
 
+        } else if (c == 'l') { //  Cursor right
+            Screen.cursorChar++;
+            Cursor.column++;
+
+        } else if (c == 'h') { // Cursor left
+            if (!(Cursor.column == Cursor.offset)) { 
+                Cursor.column--; 
+                Screen.cursorChar--;
+            }
+
         } else if (c == 'w') { //  Write to file
             File.writeFile();
             Screen.cmdLine = "File hath been wroteth";
@@ -98,6 +109,12 @@ struct edit {
         } else if (c == 'u') {
             if (undoIndex < 0) { return; } //  Do not undo if there is nothing to undo
             undo(File, Screen, Cursor);
+        } else if (c == '$') {
+            endOfTheLine(File, Screen, Cursor);
+        }
+
+        if (Screen.cursorChar > File.vect[Screen.cursorLine].length()) {
+           endOfTheLine(File, Screen, Cursor);
         }
 
     }
@@ -124,5 +141,17 @@ struct edit {
         }
         File.vect[Undo.line] = lineBegin + lineEnd;
         undoIndex--;
+    }
+
+    void endOfTheLine(file &File, screen &Screen, cursor &Cursor) {
+        Screen.rightLine = File.vect[Screen.cursorLine].length();
+        Screen.cursorChar = Screen.rightLine;
+        Screen.leftLine = Screen.rightLine - Screen.horizontalSize;
+
+        if (Screen.leftLine < 0) {
+            Screen.rightLine -= Screen.leftLine;
+            Cursor.column = (Cursor.offset + Screen.horizontalSize) + Screen.leftLine;
+            Screen.leftLine -= Screen.leftLine;
+        }
     }
 };
