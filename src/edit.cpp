@@ -27,7 +27,7 @@ struct edit {
         std::string currentLine = File.vect[Screen.cursorLine];
         std::string lineBegin;
         std::string lineEnd;
-        int index = Cursor.column - Cursor.offset;
+        int index = Screen.cursorChar;
         int undoInsert;
         char character = File.vect[Screen.cursorLine][index];
 
@@ -111,6 +111,12 @@ struct edit {
             undo(File, Screen, Cursor);
         } else if (c == '$') {
             endOfTheLine(File, Screen, Cursor);
+            Cursor.column = Cursor.offset;
+            if (File.vect[Screen.cursorLine].length() < Screen.horizontalSize) {
+                Cursor.column += File.vect[Screen.cursorLine].length();
+            } else {
+                Cursor.column += Screen.horizontalSize;
+            }
         }
 
         if (Screen.cursorChar > File.vect[Screen.cursorLine].length()) {
