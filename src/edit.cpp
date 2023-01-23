@@ -29,9 +29,9 @@ struct edit {
             File.vect[Screen.cursorLine].erase(index - 1, 1);
             Cursor.column--;
             
-        } else if (c == 10) {
+        } else if (c == 10) { //  Newline
             undoInsert = 0;
-            File.vect.insert(File.vect.begin() + Screen.cursorLine, "");
+            File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, "");
             Cursor.row++;
             Screen.cursorLine++;
             Cursor.column = Cursor.offset;
