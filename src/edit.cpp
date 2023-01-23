@@ -10,10 +10,17 @@ enum mode {
     insert = 1
 } Mode;
 
+struct undoInstruction {
+    int index;
+    int line;
+    int action;
+    std::string text;
+};
+
 struct edit {
     int undoIndex = -1;
     std::string cmdLine2;
-    std::vector<std::vector<int>> undoStack;
+    std::vector<undoInstruction> undoStack;
     
     void insertMode(file &File, screen &Screen, cursor &Cursor, char c) {
         std::vector<int> action;
@@ -47,11 +54,18 @@ struct edit {
         }
 
         //  Create undo instruction, [line, index, (insert), char]
-        index = Cursor.column - Cursor.offset;
-        character = File.vect[Screen.cursorLine][index - 1];
-        action = {Screen.cursorLine, index, undoInsert, character};
+        undoInstruction Undo;
+
+        Undo.line = Screen.cursorLine;
+        Undo.index = Cursor.column - Cursor.offset;
+        Undo.text = File.vect[Screen.cursorLine][index - 1];
+        Undo.action = undoInsert;
+
+        //  If the index is not at the end, remove everything under it to prevent breaking the stack
         if (!(++undoIndex == undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
-        undoStack.push_back(action);
+
+        undoStack.push_back(Undo);
+
     }
 
     void commandMode(file &File, screen &Screen, cursor &Cursor, char c) {
@@ -78,7 +92,7 @@ struct edit {
 
         } else if (c == 't') {
             for (auto& it : undoStack) {
-                printf("[%d, %d, %d, %c]\n", it[0], it[1], it[2], it[3]);
+                printf("[%d, %d, %d, %s]\n", it.line, it.index, it.action, it.text.c_str());
             }
             exit(0);
         } else if (c == 'u') {
@@ -90,25 +104,25 @@ struct edit {
 
     void undo(file &File, screen &Screen, cursor &Cursor) {
         //  undoStack format [line, index, action (0-1), char]
-        std::vector<int> action = undoStack[undoIndex];
-        std::string lineBegin = File.vect[action[0]].substr(0, action[1]);
-        std::string lineEnd = File.vect[action[0]].substr(action[1]);
-        Cursor.row = action[0] + 1;
-        Cursor.column = Cursor.offset + action[1];
+        undoInstruction Undo = undoStack[undoIndex];
+        std::string lineBegin = File.vect[Undo.line].substr(0, Undo.index);
+        std::string lineEnd = File.vect[Undo.line].substr(Undo.index);
+        Cursor.row = Undo.line + 1;
+        Cursor.column = Cursor.offset + Undo.index;
         Screen.cursorLine = Cursor.row - 1;
 
-        if (action[2] == 1) {  //  Insert a char
-            lineBegin.push_back(action[3]);
+        if (Undo.action == 1) {  //  Insert a char
+            lineBegin.append(Undo.text);
             Cursor.column++;
 
-        } else if (action[2] == 0) { //  Delete a char
-            lineBegin = File.vect[action[0]].substr(0, action[1]);
-            lineEnd = File.vect[action[0]].substr(action[1]);
+        } else if (Undo.action == 0) { //  Delete a char
+            lineBegin = File.vect[Undo.line].substr(0, Undo.index);
+            lineEnd = File.vect[Undo.line].substr(Undo.index);
             lineBegin.pop_back();
             Cursor.column--;
 
         }
-        File.vect[action[0]] = lineBegin + lineEnd;
+        File.vect[Undo.line] = lineBegin + lineEnd;
         undoIndex--;
     }
 };
