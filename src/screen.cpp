@@ -1,9 +1,13 @@
 #pragma once
 #include <cstdio>
-#include <ios>
-#include <iostream>
+#include <unistd.h>
+#include <stdio.h>
+#include <sys/ioctl.h>
+#include <termios.h>
 
 #include "file.cpp"
+
+struct winsize size;
 
 struct cursor {
     int row = 1;
@@ -18,8 +22,8 @@ struct cursor {
 struct screen {
     std::string cmdLine;
     std::string modes[2] = {"command", "insert"};
-    int verticalSize = 10;
-    int horizontalSize = 20;
+    int verticalSize = size.ws_row - 1;
+    int horizontalSize = size.ws_col - 8;
     int cursorLine = 0;
     int cursorChar = 0;
     int scrollIndex = 0;

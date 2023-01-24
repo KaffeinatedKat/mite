@@ -26,6 +26,7 @@ void cook() {
 
 
 int main(int argc, char *argv[]) {
+    ioctl( 0, TIOCGWINSZ, (char *) &size );
     uncook();
     printf("\033[H\033[J");
     char c;
