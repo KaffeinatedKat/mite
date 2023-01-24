@@ -35,6 +35,7 @@ struct edit {
             undoInsert = 1;
             File.vect[Screen.cursorLine].erase(index - 1, 1);
             Cursor.column--;
+            Screen.cursorChar--;
             
         } else if (c == 10) { //  Newline
             undoInsert = 0;
