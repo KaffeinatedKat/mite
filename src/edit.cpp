@@ -83,7 +83,7 @@ struct edit {
 
         } else if (c == 'k') { //  Cursor up
             if (!(Cursor.row <= 1)) { Cursor.row -= 1; }
-            if (!(Screen.cursorLine <= 1)) { Screen.cursorLine -= 1; }
+            if (!(Screen.cursorLine < 1)) { Screen.cursorLine -= 1; }
 
         } else if (c == 'l') { //  Cursor right
             Screen.cursorChar++;
