@@ -19,6 +19,42 @@ struct cursor {
     }
 };
 
+
+struct popup {
+    std::vector<std::string> list;
+    std::string color = "\x1b[41m";
+    int length = 0;
+    int listIndex = 0;
+    int topLine = 0;
+    int bottomLine = 10;
+
+    void print(cursor &Cursor) {
+        int line = Cursor.row + 1;
+        int index = 0;
+
+        printf("\x1b[B");
+        for (auto& it : list) {
+            index++;
+            if (listIndex == index) { color = "\x1b[42m"; } //  Highlighted item
+            printf("%s %s%s\x1b[%d;%dH", color.c_str(), it.c_str(), std::string(length - it.length() + 1, ' ').c_str(),++line, Cursor.column); //  Print item, move back and down, print again
+            color = "\x1b[41m"; //  Dehighlight item
+
+            if (index == bottomLine) { break; }
+        }
+        printf("\x1b[0m");
+        Cursor.move(); //  Move cursor back to original position
+    }
+
+    void append(std::string value) {
+        if (value.length() > length) {
+            length = value.length();
+        }
+        list.push_back(value);
+    }
+
+};
+
+
 struct screen {
     std::string cmdLine;
     std::string modes[2] = {"command", "insert"};
@@ -32,7 +68,7 @@ struct screen {
     int leftLine = 0;
     int rightLine = horizontalSize;
 
-    void print(file File, int m) {
+    void print(file File, popup &Popup, int m) {
         int line = 0;
         std::string highlight = "";
 

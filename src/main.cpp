@@ -17,6 +17,7 @@ void uncook() {
     tcgetattr(STDIN_FILENO, &orig);
     raw = orig;
     raw.c_lflag &= ~(ECHO | ICANON | IEXTEN);
+    raw.c_iflag &= IGNCR;
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
 }
 
@@ -37,13 +38,15 @@ int main(int argc, char *argv[]) {
     file File;
     screen Screen;
     edit Edit;
+    popup Popup;
     Mode = command;
     int x = 1;
 
     File.filePath = argv[1];
     File.openFile();
-    Screen.print(File, Mode);
+    Screen.print(File, Popup, Mode);
     Cursor.move();
+    Popup.listIndex = 2;
     std::fflush(stdout);
 
     while (read(STDIN_FILENO, &c, 1)) {
@@ -56,8 +59,14 @@ int main(int argc, char *argv[]) {
         }
 
         printf("\033[H\033[J");
-        Screen.print(File, Mode);
+        Screen.print(File, Popup, Mode);
         Cursor.move();
+
+        if (c == 'c') {
+            Popup.list.clear();
+        }
+        Popup.print(Cursor);
+
         std::fflush(stdout);
     }
 }

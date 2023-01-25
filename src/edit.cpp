@@ -43,6 +43,7 @@ struct edit {
             Cursor.row++;
             Screen.cursorLine++;
             Cursor.column = Cursor.offset;
+            Screen.cursorChar = 0;
 
         } else { //  Insert char
             undoInsert = 0;
