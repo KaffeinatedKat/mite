@@ -16,7 +16,8 @@ void uncook() {
     tcgetattr(STDIN_FILENO, &orig);
     raw = orig;
     raw.c_lflag &= ~(ECHO | ICANON);
-    tcsetattr(STDIN_FILENO, TCSAFLUSH, &raw);
+    raw.c_iflag &= ~(ICRNL);
+    tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 }
 
 void cook() {

@@ -37,7 +37,7 @@ struct edit {
             Cursor.column--;
             Screen.cursorChar--;
             
-        } else if (c == 10) { //  Newline
+        } else if (c == 13) { //  Newline
             undoInsert = 0;
             File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, "");
             Cursor.row++;
