@@ -106,7 +106,7 @@ struct screen {
             }
             highlight = "";
 
-            if (line == bottomLine) {
+            if (line > bottomLine) {
                 printf("< %s > %s", modes[m].c_str(), cmdLine.c_str());
                 break;
             }

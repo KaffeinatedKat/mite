@@ -108,16 +108,19 @@ struct edit {
                 printf("[%d, %d, %d, %s]\n", it.line, it.index, it.action, it.text.c_str());
             }
             exit(0);
+
         } else if (c == 'u') {
             if (undoIndex < 0) { return; } //  Do not undo if there is nothing to undo
             undo(File, Screen, Cursor);
+
         } else if (c == '$') {
             endOfTheLine(File, Screen, Cursor);
-            Cursor.column = Cursor.offset;
-            if (File.vect[Screen.cursorLine].length() < Screen.horizontalSize) {
-                Cursor.column += File.vect[Screen.cursorLine].length();
-            } else {
-                Cursor.column += Screen.horizontalSize;
+            Cursor.column = Cursor.offset + Screen.horizontalSize;
+
+            //  If the line is shorter than the screen
+            //  the terminal cursor will be in the wrong spot
+            if (File.vect[Screen.cursorLine].length() < Screen.horizontalSize) {  
+                Cursor.column = Cursor.offset + File.vect[Screen.cursorLine].length();
             }
         }
 
