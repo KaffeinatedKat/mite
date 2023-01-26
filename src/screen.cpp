@@ -56,8 +56,8 @@ struct popup {
 
 
 struct screen {
-    std::string cmdLine;
     std::string modes[2] = {"command", "insert"};
+    std::string cmdLine;
     int verticalSize = size.ws_row - 1;
     int horizontalSize = size.ws_col - 8;
     int cursorLine = 0;
@@ -67,6 +67,7 @@ struct screen {
     int bottomLine = verticalSize;
     int leftLine = 0;
     int rightLine = horizontalSize;
+
 
     void print(file File, popup &Popup, int m) {
         int line = 0;

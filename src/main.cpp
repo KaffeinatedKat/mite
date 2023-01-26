@@ -3,6 +3,7 @@
 #include <iostream>
 #include <unistd.h>
 #include <termios.h>
+#include <csignal>
 
 #include "file.cpp"
 #include "screen.cpp"
@@ -16,7 +17,7 @@ void uncook() {
     tcgetattr(STDIN_FILENO, &orig);
     raw = orig;
     raw.c_lflag &= ~(ECHO | ICANON);
-    raw.c_iflag &= ~(ICRNL);
+    raw.c_iflag &= ~(ICRNL | IGNBRK);
     tcsetattr(STDIN_FILENO, TCSANOW, &raw);
 }
 
@@ -24,6 +25,7 @@ void cook() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig);
 }
 
+void ctrlc(int) {}
 
 int main(int argc, char *argv[]) {
     ioctl( 0, TIOCGWINSZ, (char *) &size );
@@ -41,6 +43,7 @@ int main(int argc, char *argv[]) {
     Mode = command;
     int x = 1;
 
+    signal(SIGINT, ctrlc);
     File.filePath = argv[1];
     File.openFile();
     Screen.print(File, Popup, Mode);
@@ -49,6 +52,9 @@ int main(int argc, char *argv[]) {
     std::fflush(stdout);
 
     while (read(STDIN_FILENO, &c, 1)) {
+        if (c == 'q') {
+            exit(0);
+        }
         if (c == 27) { //  Command mode on ESC
             Mode = command;
         } else if (Mode == insert) {
@@ -70,6 +76,4 @@ int main(int argc, char *argv[]) {
         std::fflush(stdout);
     }
 }
-
-
 
