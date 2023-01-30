@@ -35,4 +35,4 @@ mite uses bindings identical to vim
 
 `w` writes the file
 
-`ctrl-c` to exit
+`q` to exit
