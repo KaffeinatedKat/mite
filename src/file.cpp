@@ -3,9 +3,17 @@
 #include <vector>
 #include <fstream>
 
+struct error {
+    std::string reason;
+    std::string lineText;
+    int line;
+};
+
 struct file {
     std::vector<std::string> vect;
+    std::vector<error> errVect;
     std::string filePath;
+    std::string string;
 
     void openFile() {
         vect.clear();
@@ -24,6 +32,12 @@ struct file {
 
         for (auto& it : vect) {
             f << it + '\n';
+        }
+    }
+
+    void toString() {
+        for (const auto& it : vect) {
+            string.append(it + "\r\n");
         }
     }
 };

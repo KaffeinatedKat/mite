@@ -69,12 +69,18 @@ struct screen {
     int rightLine = horizontalSize;
 
 
-    void print(file File, popup &Popup, int m) {
+    //  FIXME: This fucntion is a mess
+    void print(file File, popup &Popup, int mode) {
         int line = 0;
+        std::string lineText;
         std::string highlight = "";
 
+        printf("\033[H\033[J");
+
         for (auto& it : File.vect) {
+            lineText = it;
             line++;
+
 
             if (cursorLine > bottomLine) { //  Scrolling down
                 bottomLine++;
@@ -97,18 +103,23 @@ struct screen {
             }
 
             if (line == cursorLine + 1) {
-                highlight = "\x1b[40m";
+                highlight += "\x1b[40m";
             }
-            if (it.length() > rightLine - horizontalSize) {
+            for (const auto& it : File.errVect) {
+                if (it.line + 1 == line && mode == 0) {
+                    lineText = it.lineText; 
+                }
+            }
+            if (lineText.length() > rightLine - horizontalSize) {
 
-                printf("%s%-5d| %s\x1b[0m\n", highlight.c_str(), line, it.substr(rightLine - horizontalSize, horizontalSize).c_str());
+                printf("%s%-5d| %s\x1b[0m\n", highlight.c_str(), line, lineText.substr(rightLine - horizontalSize, horizontalSize).c_str());
             } else {
                 printf("%s%-5d| \x1b[0m\n", highlight.c_str(), line);
             }
             highlight = "";
 
             if (line > bottomLine) {
-                printf("< %s > %s", modes[m].c_str(), cmdLine.c_str());
+                printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
                 break;
             }
         }
