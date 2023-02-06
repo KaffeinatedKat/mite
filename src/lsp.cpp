@@ -317,7 +317,8 @@ struct lsp {
                 start = issue["range"]["start"]["character"].GetInt();
                 end = issue["range"]["end"]["character"].GetInt();
 
-                Err.lineText = currentLine.substr(0, start) + "\x1b[9m" + currentLine.substr(start, end) + "\x1b[0m" + currentLine.substr(end) + "\x1b[2;3m  " + issue["message"].GetString();
+                Err.lineText = currentLine.substr(0, start) + "\x1b[9m" + currentLine.substr(start, end - start) + "\x1b[0m" + currentLine.substr(end) + "\x1b[2;3m  " + issue["message"].GetString();
+
                 //printf("%s", Err.lineText.c_str());
                 File.errVect.push_back(Err);
                 
