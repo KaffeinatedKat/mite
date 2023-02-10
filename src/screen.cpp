@@ -132,9 +132,9 @@ struct screen {
                     }
                 }
 
-                printf("%-5d| %s\x1b[0m\n", start, viewableLine.c_str());
+                printf("%-5d| %s\x1b[0m\n", line, viewableLine.c_str());
             } else {
-                printf("%-5d| \x1b[0m\n", start);
+                printf("%-5d| \x1b[0m\n", line);
             }
 
             if (line > bottomLine) {
