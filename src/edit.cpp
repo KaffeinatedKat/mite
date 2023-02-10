@@ -52,7 +52,7 @@ struct edit {
             lineBegin.push_back(c);
             File.vect[Screen.cursorLine] = lineBegin + lineEnd;
             Screen.cursorChar++;
-            Cursor.column++;
+            if (!(Cursor.column == Screen.horizontalSize)) { Cursor.column++; }
 
         }
 
@@ -87,14 +87,12 @@ struct edit {
             if (!(Screen.cursorLine < 1)) { Screen.cursorLine -= 1; }
 
         } else if (c == 'l') { //  Cursor right
-            Screen.cursorChar++;
-            Cursor.column++;
+            if (Screen.cursorChar <= File.vect[Screen.cursorLine].length()) { Screen.cursorChar++; }
+            if (!(Cursor.column == Screen.horizontalSize)) { Cursor.column++; }
 
         } else if (c == 'h') { // Cursor left
-            if (!(Cursor.column == Cursor.offset)) { 
-                Cursor.column--; 
-                Screen.cursorChar--;
-            }
+            if (!(Cursor.column == Cursor.offset)) { Cursor.column--; }
+            if (Screen.cursorChar > 0) { Screen.cursorChar--; }
 
         } else if (c == 'w') { //  Write to file
             File.writeFile();
@@ -157,7 +155,7 @@ struct edit {
     void endOfTheLine(file &File, screen &Screen, cursor &Cursor) {
         Screen.rightLine = File.vect[Screen.cursorLine].length();
         Screen.cursorChar = Screen.rightLine;
-        Screen.leftLine = Screen.rightLine - Screen.horizontalSize;
+        Screen.leftLine = Screen.rightLine - (Screen.horizontalSize - 8);
 
         if (Screen.leftLine < 0) {
             Screen.rightLine -= Screen.leftLine;

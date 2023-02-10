@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
                 Mode = command;
                 Popup.list.clear();
             } else if (Mode == insert) {
-                File.errVect.clear();
+                File.errMap.clear();
                 Edit.insertMode(File, Screen, Cursor, c);
                 Lsp.didChange(File, Screen, c);
                 Lsp.completion(File, Screen, Popup);

@@ -308,19 +308,25 @@ struct lsp {
             int start;
             int end;
 
-            //printf("%s", sb.GetString());
+            printf("%s\n\n\n\n", sb.GetString());
 
             for (Value::ConstValueIterator it = responseJson["params"]["diagnostics"].Begin(); it != responseJson["params"]["diagnostics"].End(); ++it) {
                 const Value& issue = *it;
                 Err.line = issue["range"]["start"]["line"].GetInt();
                 currentLine = File.vect[Err.line];
-                start = issue["range"]["start"]["character"].GetInt();
-                end = issue["range"]["end"]["character"].GetInt();
+                Err.lineText = File.vect[Err.line];
+                Err.start = issue["range"]["start"]["character"].GetInt();
+                Err.end = issue["range"]["end"]["character"].GetInt();
 
-                Err.lineText = currentLine.substr(0, start) + "\x1b[9m" + currentLine.substr(start, end - start) + "\x1b[0m" + currentLine.substr(end) + "\x1b[2;3m  " + issue["message"].GetString();
+                //Err.lineText = currentLine.substr(0, start) + "\x1b[9m" + currentLine.substr(start, end - start) + "\x1b[0m" + currentLine.substr(end) + "\x1b[2;3m  " + issue["message"].GetString();
 
                 //printf("%s", Err.lineText.c_str());
-                File.errVect.push_back(Err);
+                //Err.lineText.insert(Err.start, "\033[9m");
+                //Err.lineText.insert(Err.end + 4, "\033[0m");
+            
+                Err.lineText.append("  \033[2;3m");
+                Err.lineText.append(issue["message"].GetString());
+                File.errMap[Err.line] = Err;
                 
             }
 

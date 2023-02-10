@@ -59,26 +59,34 @@ struct screen {
     std::string modes[2] = {"command", "insert"};
     std::string cmdLine;
     int verticalSize = size.ws_row - 1;
-    int horizontalSize = size.ws_col - 8;
+    int horizontalSize = size.ws_col;
     int cursorLine = 0;
     int cursorChar = 0;
     int scrollIndex = 0;
     int topLine = 1;
     int bottomLine = verticalSize;
     int leftLine = 0;
-    int rightLine = horizontalSize;
+    int rightLine = horizontalSize - 8;
 
 
     //  FIXME: This fucntion is a mess
     void print(file File, popup &Popup, int mode) {
         int line = 0;
+        int size;
+        int start;
+        int end;
         std::string lineText;
+        std::string viewableLine;
 
         printf("\033[H\033[J");
 
         for (auto& it : File.vect) {
+            start = -1;
+            end = -1;
             lineText = it;
+            if (File.errMap.count(line) > 0 && mode == 0) { lineText = File.errMap[line].lineText; }
             line++;
+            
 
 
             if (cursorLine > bottomLine) { //  Scrolling down
@@ -101,22 +109,38 @@ struct screen {
                 continue;
             }
 
-            for (const auto& it : File.errVect) {
-                if (it.line + 1 == line && mode == 0) {
-                    lineText = it.lineText; 
+            if (lineText.length() > rightLine - (horizontalSize - 8)) {
+                if (File.errMap.count(line - 1) > 0) {
+                    start = File.errMap[line - 1].start;
+                    end = File.errMap[line - 1].end;
                 }
-            }
+                size = rightLine - (horizontalSize - 8);
+                viewableLine = lineText.substr(size, horizontalSize - 8);
 
-            if (lineText.length() > rightLine - horizontalSize) {
-                printf("%-5d| %s\x1b[0m\n", line, lineText.substr(rightLine - horizontalSize, horizontalSize).c_str());
+                //  Error stuff
+                if (!(start == -1)) {
+                    if (start > size && start < size + (horizontalSize - 8)) {
+                        viewableLine.insert(start - size, "\x1b[9m");
+                    } else if (start <= size && end > size) {
+                        viewableLine.insert(0, "\x1b[9m");
+                    }
+
+                    if (end > horizontalSize - 8) {
+                        viewableLine.append("\x1b[0m");
+                    } else if (end > size && end < size + (horizontalSize - 8)) {
+                        viewableLine.insert(end - size + 4, "\x1b[0m");
+                    }
+                }
+
+                printf("%-5d| %s\x1b[0m\n", start, viewableLine.c_str());
             } else {
-                printf("%-5d| \x1b[0m\n", line);
+                printf("%-5d| \x1b[0m\n", start);
             }
 
             if (line > bottomLine) {
-                printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
                 break;
             }
         }
+        printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
     }
 };
