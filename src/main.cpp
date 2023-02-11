@@ -10,7 +10,15 @@
 #include "file.cpp"
 #include "screen.cpp"
 #include "edit.cpp"
+
+#define FDS 2
+
+#ifndef NO_LSP
 #include "lsp.cpp"
+#else
+#undef FDS
+#define FDS 1
+#endif
 
 struct termios raw;
 struct termios orig;
@@ -45,17 +53,10 @@ int main(int argc, char *argv[]) {
     edit Edit;
     popup Popup;
 
-    lsp Lsp;
     Mode = command;
     int x = 1;
 
-    Lsp.start("clangd");
-
-    pfds[0].fd = STDIN_FILENO;
-    pfds[0].events = POLLIN;
-    pfds[1].fd = Lsp.lspOut[0];
-    pfds[1].events = POLLIN;
-
+    
 
     signal(SIGINT, ctrlc);
     File.filePath = "/home/coffee/github/mite/" + std::string(argv[1]);
@@ -65,10 +66,29 @@ int main(int argc, char *argv[]) {
     Cursor.move();
     Popup.listIndex = 1;
     std::fflush(stdout);
+
+    pfds[0].fd = STDIN_FILENO;
+    pfds[0].events = POLLIN;    
+    
+#ifndef NO_LSP
+    lsp Lsp;
+    Lsp.start("clangd");
+    pfds[1].fd = Lsp.lspOut[0];
+    pfds[1].events = POLLIN;
     Lsp.initialize();
     Lsp.didOpen(File, "cpp");
-    
-    while ((ready = poll(pfds, 2, -1)) > 0) {
+#else
+    struct lsp {
+        void exit() {}
+        void didChange(file, screen, char) {}
+        void completion(file, screen, popup) {}
+        char* readJson() { char* retVal; return retVal; }
+        void parseResponse(file, screen, cursor, popup, int, char *) {}
+    };
+    lsp Lsp;
+#endif 
+
+    while ((ready = poll(pfds, FDS, -1)) > 0) {
         if (pfds[0].revents & POLLIN) { //  User has typed
             read(STDIN_FILENO, &c, 1);
 

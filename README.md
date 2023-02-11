@@ -17,6 +17,8 @@ cd mite
 clang++ src/main.cpp -o mite
 ```
 
+Lsp support is built by default, to build without it use `-DNO_LSP`
+
 ## Usage
 `mite [file]`
 
