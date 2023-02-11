@@ -6,6 +6,8 @@
 #include <poll.h>
 #include <csignal>
 #include <thread>
+#include <filesystem>
+#include <iostream>
 
 #include "file.cpp"
 #include "screen.cpp"
@@ -59,7 +61,7 @@ int main(int argc, char *argv[]) {
     
 
     signal(SIGINT, ctrlc);
-    File.filePath = "/home/coffee/github/mite/" + std::string(argv[1]);
+    File.filePath = std::filesystem::current_path().string() + std::string(argv[1]);
     File.openFile();
     File.toString();
     Screen.print(File, Popup, Mode);
