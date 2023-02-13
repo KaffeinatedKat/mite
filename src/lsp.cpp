@@ -1,23 +1,16 @@
 #define RAPIDJSON_ASSERT(x)
 
 #include <cstdlib>
-#include <rapidjson/stringbuffer.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <fcntl.h>
-#include <errno.h>
 #include <unistd.h>
-#include <thread>
 #include <mutex>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <poll.h>
+#include <rapidjson/stringbuffer.h>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <string>
-#include <string.h>
-#include <iostream>
-#include <climits>
 
 #include "screen.cpp"
 #include "file.cpp"
@@ -45,6 +38,7 @@ struct lsp {
         int ret;
         int jsonSize = 0;
 
+        //  Pipe stdin, stdout, and stderr from the language server
         if (pipe(lspIn) == -1) { err("pipe 1 failed"); }
         if (pipe(lspOut) == -1) { err("pipe 1 failed"); }
         if (pipe(lspErr) == -1) { err("pipe 1 failed"); }
@@ -93,6 +87,9 @@ struct lsp {
     }
 
 
+
+    //  FIXME: This json object should not be built, does not change and should be a string
+    //  like the rest of the functions
 
     void initialize() {
         std::string initMsg;
@@ -212,12 +209,16 @@ struct lsp {
             text.append("\r\n\r\n");
         }
 
+        //  FIXME: this shouldn't have to be 2 edit commands
+
+        //  Replace the current line with an empty string
         didChange["params"]["contentChanges"][0]["range"]["start"]["line"].SetInt(line);
         didChange["params"]["contentChanges"][0]["range"]["start"]["character"].SetInt(0);
         didChange["params"]["contentChanges"][0]["range"]["end"]["line"].SetInt(line + 1);
         didChange["params"]["contentChanges"][0]["range"]["end"]["character"].SetInt(0);
         didChange["params"]["contentChanges"][0]["text"].SetString("", allocator);
 
+        //  Then set that line to the new text from the editor
         didChange["params"]["contentChanges"][1]["range"]["start"]["line"].SetInt(line);
         didChange["params"]["contentChanges"][1]["range"]["start"]["character"].SetInt(0);
         didChange["params"]["contentChanges"][1]["range"]["end"]["line"].SetInt(line);
@@ -295,7 +296,9 @@ struct lsp {
             Popup.print(Cursor);
             std::fflush(stdout);
 
-        //  (Diagnostic) Error responce, parse items and create error lines
+        // FIXME: This is a mess, unfished implementation of how errors are printed to the screen
+
+        //  (Diagnostic)/(Error responce), parse items and create error lines
         } else if (responseJson["method"].IsString() && strcmp(responseJson["method"].GetString(), "textDocument/publishDiagnostics") == 0) {
             struct error Err;
             std::string currentLine;
@@ -331,31 +334,3 @@ struct lsp {
         }
     }
 };
-
-
-/*
-int main() {
-    lsp Lsp;
-    cursor Cursor;
-    file File;
-
-    File.string = "#include <string>\r\nint main{\r\nstd::strin}";
-    File.filePath = "/home/coffee/test.cpp";
-    Cursor.row = 2;
-    Cursor.column = 2;
-    std::string hi;
-
-    std::thread lisp([&]() {
-        Lsp.start("clangd");
-    });
-    lisp.detach();
-
-    Lsp.initialize();
-    Lsp.didOpen("/home/coffee/test.cpp", "cpp");
-    Lsp.completion(File, Cursor);
-
-    printf("hoi");
-    std::cin >> hi;
-    
-}
-*/
