@@ -118,7 +118,7 @@ struct screen {
                 viewableLine = lineText.substr(size, horizontalSize - 8);
 
                 //  Error stuff
-                if (!(start == -1)) {
+                if (!(start == -1) && mode == 0) {
                     if (start > size && start < size + (horizontalSize - 8)) {
                         viewableLine.insert(start - size, "\x1b[9m");
                     } else if (start <= size && end > size) {
