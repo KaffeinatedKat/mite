@@ -206,29 +206,23 @@ struct lsp {
         didChange["params"]["textDocument"]["uri"].SetString(uri.c_str(), allocator);
         didChange["params"]["textDocument"]["version"].SetInt(++version);
 
-        // ES MUY NO BUENO
-        // REPAIR THE SON OF A SHITTER
         if (c == 13) { //  Newline insert 
-            didChange["params"]["contentChanges"][0]["range"]["start"]["line"].SetInt(line);
-            didChange["params"]["contentChanges"][0]["range"]["start"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][0]["range"]["end"]["line"].SetInt(line);
-            didChange["params"]["contentChanges"][0]["range"]["end"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][0]["text"].SetString("\r\n", allocator);
+            line--;
+            text = File.vect[Screen.cursorLine - 1];
+            text.append("\r\n\r\n");
+        }
 
-            didChange["params"]["contentChanges"][1].RemoveAllMembers();
-        } else {
-            didChange["params"]["contentChanges"][0]["range"]["start"]["line"].SetInt(line);
-            didChange["params"]["contentChanges"][0]["range"]["start"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][0]["range"]["end"]["line"].SetInt(line + 1);
-            didChange["params"]["contentChanges"][0]["range"]["end"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][0]["text"].SetString("", allocator);
+        didChange["params"]["contentChanges"][0]["range"]["start"]["line"].SetInt(line);
+        didChange["params"]["contentChanges"][0]["range"]["start"]["character"].SetInt(0);
+        didChange["params"]["contentChanges"][0]["range"]["end"]["line"].SetInt(line + 1);
+        didChange["params"]["contentChanges"][0]["range"]["end"]["character"].SetInt(0);
+        didChange["params"]["contentChanges"][0]["text"].SetString("", allocator);
 
-            didChange["params"]["contentChanges"][1]["range"]["start"]["line"].SetInt(line);
-            didChange["params"]["contentChanges"][1]["range"]["start"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][1]["range"]["end"]["line"].SetInt(line);
-            didChange["params"]["contentChanges"][1]["range"]["end"]["character"].SetInt(0);
-            didChange["params"]["contentChanges"][1]["text"].SetString(text.c_str(), allocator);
-        } 
+        didChange["params"]["contentChanges"][1]["range"]["start"]["line"].SetInt(line);
+        didChange["params"]["contentChanges"][1]["range"]["start"]["character"].SetInt(0);
+        didChange["params"]["contentChanges"][1]["range"]["end"]["line"].SetInt(line);
+        didChange["params"]["contentChanges"][1]["range"]["end"]["character"].SetInt(0);
+        didChange["params"]["contentChanges"][1]["text"].SetString(text.c_str(), allocator);
 
 
         StringBuffer sb;
