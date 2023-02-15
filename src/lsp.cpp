@@ -1,5 +1,7 @@
 #include "lsp.hpp"
 
+#ifndef NO_LSP
+
 using namespace rapidjson;
 
 
@@ -306,4 +308,18 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
         std::fflush(stdout);
     }
 }
+#else
 
+void lsp::start(std::string) {}
+char* lsp::readJson() {
+    char* retVal;
+    return retVal;
+}
+void lsp::initialize() {}
+void lsp::exit() {}
+void lsp::didOpen(file &, std::string) {}
+void lsp::didChange(file &, screen &, char) {}
+void lsp::completion(file &, screen &, popup &) {}
+void lsp::parseResponse(file &, screen &, cursor &, popup &, winsize, int, char*) {}
+
+#endif

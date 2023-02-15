@@ -4,7 +4,7 @@ SRC := $(shell fd -e cpp . $(SRC_ROOT))
 HEADERS := $(shell fd -e hpp . $(HEADER_ROOT))
 OBJ := $(SRC:%.cpp=%.o)
 WARNINGS := -Wall -Wextra -Wpedantic -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn -Wsuggest-attribute=cold -Walloca -Wduplicated-branches -Wduplicated-cond -Wfloat-equal -Wlarger-than=4KiB -Wpointer-arith
-OUT ?= main
+OUT ?= mite
 CXXFLAGS ?= -std=c++11 -pipe
 INCLUDE := -Iinclude
 LIB :=
@@ -25,6 +25,9 @@ release: CXX = clang++
 release: CXXFLAGS += -O2 -flto=thin
 release: all
 
+minimal: CXXFLAGS += -DNO_LSP
+minimal: release
+
 format: $(SRC) $(HEADERS)
 	clang-format -i $(SRC) $(HEADERS)
 
@@ -32,7 +35,7 @@ debugger: debug
 	gdb $(OUT)
 
 $(OUT): $(OBJ)
-	$(CXX) -o mite $^ $(CXXFLAGS) $(LIB)
+	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIB)
 
 %.o: %.cpp $(HEADERS)
 	$(CXX) -c -o $@ $(INCLUDE) $(CXXFLAGS) $<
@@ -43,5 +46,7 @@ compile_flags.txt: Makefile
 		echo $$flag >> $@; \
 	done
 
-clean: $(OUT) $(OBJ) compile_flags.txt
-	rm -rf $^
+clean:
+	rm -rf $(OUT)
+	rm -rf compile_flags.txt 
+	rm -rf src/*.o

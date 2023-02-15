@@ -12,11 +12,11 @@
 #include "file.hpp"
 #include "edit.hpp"
 #include "screen.hpp"
+#include "lsp.hpp"
 
 #define FDS 2
 
 #ifndef NO_LSP
-#include "lsp.hpp"
 #else
 #undef FDS
 #define FDS 1
@@ -57,6 +57,7 @@ int main(int argc, char *argv[]) {
     screen Screen;
     edit Edit;
     popup Popup;
+    lsp Lsp;
     Mode = command;
 
     signal(SIGINT, ctrlc);
@@ -72,21 +73,11 @@ int main(int argc, char *argv[]) {
     pfds[0].events = POLLIN;    
     
 #ifndef NO_LSP
-    lsp Lsp;
     Lsp.start("clangd");
     pfds[1].fd = Lsp.lspOut[0];
     pfds[1].events = POLLIN;
     Lsp.initialize();
     Lsp.didOpen(File, "cpp");
-#else
-    struct lsp {
-        void exit() {}
-        void didChange(file, screen, char) {}
-        void completion(file, screen, popup) {}
-        char* readJson() { char* retVal; return retVal; }
-        void parseResponse(file, screen, cursor, popup, size, int, char *) {}
-    };
-    lsp Lsp;
 #endif 
 
     while ((ready = poll(pfds, FDS, -1)) > 0) {
