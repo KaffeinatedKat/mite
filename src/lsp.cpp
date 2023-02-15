@@ -296,7 +296,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
             //Err.lineText.insert(Err.start, "\033[9m");
             //Err.lineText.insert(Err.end + 4, "\033[0m");
         
-            Err.lineText.append("  \033[2;3m");
+            Err.lineText.append("  \033[1;31m");
             Err.lineText.append(issue["message"].GetString());
             File.errMap[Err.line] = Err;
             
