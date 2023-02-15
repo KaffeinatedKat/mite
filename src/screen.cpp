@@ -1,146 +1,120 @@
-#pragma once
-#include <cstdio>
-#include <unistd.h>
-#include <stdio.h>
-#include <sys/ioctl.h>
-#include <termios.h>
+#include "screen.hpp"
 
-#include "file.cpp"
 
-struct winsize size;
+void cursor::move() {
+    printf("\x1b[%d;%dH", row, column);
+}
 
-struct cursor {
-    int row = 1;
-    int column = 8;
-    int offset = 8;
 
-    void move() {
-        printf("\033[%d;%dH", row, column);
+void popup::print(cursor &Cursor) {
+    int line = Cursor.row + 1;
+    int index = 0;
+
+    printf("\x1b[B");
+    for (auto& it : list) {
+        index++;
+        if (listIndex == index) { color = "\x1b[42m"; } //  Highlighted item
+        printf("%s %s%s\x1b[%d;%dH", color.c_str(), it.c_str(), std::string(length - it.length() + 1, ' ').c_str(),++line, Cursor.column); //  Print item, move back and down, print again
+        color = "\x1b[41m"; //  Dehighlight item
+
+        if (index == bottomLine) { break; }
     }
-};
+    printf("\x1b[0m");
+    Cursor.move(); //  Move cursor back to original position
+}
 
 
-struct popup {
-    std::vector<std::string> list;
-    std::string color = "\x1b[41m";
-    int length = 0;
-    int listIndex = 0;
-    int topLine = 0;
-    int bottomLine = 10;
+void popup::append(std::string value) {
+    if ((int) value.length() > length) {
+        length = value.length();
+    }
+    list.push_back(value);
+}
 
-    void print(cursor &Cursor) {
-        int line = Cursor.row + 1;
-        int index = 0;
+void popup::clr() {
+    list.clear();
+    text.clear();
+    start.clear();
+    end.clear();
+}
 
-        printf("\x1b[B");
-        for (auto& it : list) {
-            index++;
-            if (listIndex == index) { color = "\x1b[42m"; } //  Highlighted item
-            printf("%s %s%s\x1b[%d;%dH", color.c_str(), it.c_str(), std::string(length - it.length() + 1, ' ').c_str(),++line, Cursor.column); //  Print item, move back and down, print again
-            color = "\x1b[41m"; //  Dehighlight item
 
-            if (index == bottomLine) { break; }
+//  FIXME: This fucntion is a mess
+void screen::print(file File, popup &Popup, winsize ScreenSize, int mode) {
+    int line = 0;
+    int size;
+    int start;
+    int end;
+    std::string lineText;
+    std::string viewableLine;
+
+    verticalSize = ScreenSize.ws_row - 1;
+    horizontalSize = ScreenSize.ws_col;
+    bottomLine = verticalSize;
+    rightLine = horizontalSize - 8;
+
+    printf("\033[H\033[J");
+
+    for (auto& it : File.vect) {
+        start = -1;
+        end = -1;
+        lineText = it;
+        if (File.errMap.count(line) > 0 && mode == 0) { lineText = File.errMap[line].lineText; }
+        line++;
+        
+
+
+        if (cursorLine > bottomLine) { //  Scrolling down
+            bottomLine++;
+            topLine++;
+        } else if (cursorLine < topLine) { //  Scrolling up
+            bottomLine--;
+            topLine--;
         }
-        printf("\x1b[0m");
-        Cursor.move(); //  Move cursor back to original position
-    }
 
-    void append(std::string value) {
-        if (value.length() > length) {
-            length = value.length();
+        if (cursorChar > rightLine) {
+            rightLine++;
+            leftLine++;
+        } else if (cursorChar < leftLine) {
+            rightLine--;
+            leftLine--;
         }
-        list.push_back(value);
-    }
 
-};
+        if (line < topLine) {
+            continue;
+        }
 
-
-struct screen {
-    std::string modes[2] = {"command", "insert"};
-    std::string cmdLine;
-    int verticalSize = size.ws_row - 1;
-    int horizontalSize = size.ws_col;
-    int cursorLine = 0;
-    int cursorChar = 0;
-    int scrollIndex = 0;
-    int topLine = 1;
-    int bottomLine = verticalSize;
-    int leftLine = 0;
-    int rightLine = horizontalSize - 8;
-
-
-    //  FIXME: This fucntion is a mess
-    void print(file File, popup &Popup, int mode) {
-        int line = 0;
-        int size;
-        int start;
-        int end;
-        std::string lineText;
-        std::string viewableLine;
-
-        printf("\033[H\033[J");
-
-        for (auto& it : File.vect) {
-            start = -1;
-            end = -1;
-            lineText = it;
-            if (File.errMap.count(line) > 0 && mode == 0) { lineText = File.errMap[line].lineText; }
-            line++;
-            
-
-
-            if (cursorLine > bottomLine) { //  Scrolling down
-                bottomLine++;
-                topLine++;
-            } else if (cursorLine < topLine) { //  Scrolling up
-                bottomLine--;
-                topLine--;
+        if ((int)lineText.length() > rightLine - (horizontalSize - 8)) {
+            if (File.errMap.count(line - 1) > 0) {
+                start = File.errMap[line - 1].start;
+                end = File.errMap[line - 1].end;
             }
+            size = rightLine - (horizontalSize - 8);
+            viewableLine = lineText.substr(size, horizontalSize - 8);
 
-            if (cursorChar > rightLine) {
-                rightLine++;
-                leftLine++;
-            } else if (cursorChar < leftLine) {
-                rightLine--;
-                leftLine--;
-            }
-
-            if (line < topLine) {
-                continue;
-            }
-
-            if (lineText.length() > rightLine - (horizontalSize - 8)) {
-                if (File.errMap.count(line - 1) > 0) {
-                    start = File.errMap[line - 1].start;
-                    end = File.errMap[line - 1].end;
-                }
-                size = rightLine - (horizontalSize - 8);
-                viewableLine = lineText.substr(size, horizontalSize - 8);
-
-                //  Error stuff
-                if (!(start == -1) && mode == 0) {
-                    if (start > size && start < size + (horizontalSize - 8)) {
-                        viewableLine.insert(start - size, "\x1b[9m");
-                    } else if (start <= size && end > size) {
-                        viewableLine.insert(0, "\x1b[9m");
-                    }
-
-                    if (end > horizontalSize - 8) {
-                        viewableLine.append("\x1b[0m");
-                    } else if (end > size && end < size + (horizontalSize - 8)) {
-                        viewableLine.insert(end - size + 4, "\x1b[0m");
-                    }
+            //  Error stuff
+            if (!(start == -1) && mode == 0) {
+                if (start > size && start < size + (horizontalSize - 8)) {
+                    viewableLine.insert(start - size, "\x1b[9m");
+                } else if (start <= size && end > size) {
+                    viewableLine.insert(0, "\x1b[9m");
                 }
 
-                printf("%-5d| %s\x1b[0m\n", line, viewableLine.c_str());
-            } else {
-                printf("%-5d| \x1b[0m\n", line);
+                if (end > horizontalSize - 8) {
+                    viewableLine.append("\x1b[0m");
+                } else if (end > size && end < size + (horizontalSize - 8)) {
+                    viewableLine.insert(end - size + 4, "\x1b[0m");
+                }
             }
 
-            if (line > bottomLine) {
-                break;
-            }
+            printf("%-5d| %s\x1b[0m\n", line, viewableLine.c_str());
+        } else {
+            printf("%-5d| \x1b[0m\n", line);
         }
-        printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
+
+        if (line > bottomLine) {
+            break;
+        }
     }
-};
+    printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
+}
