@@ -14,10 +14,14 @@ The name comes from [idkso's](https://github.com/idkso) critism of my usage of a
 ```bash
 git clone https://github.com/KaffeinatedKat/mite
 cd mite
-clang++ src/main.cpp -o mite
+make release
 ```
 
-Lsp support is built by default, to build without it use `-DNO_LSP`
+Mite also supports a minimal build, with none of the fancy features like Lsp, this can be compiled with:
+```bash
+make minimal
+```
+
 
 ## Usage
 `mite [file]`
