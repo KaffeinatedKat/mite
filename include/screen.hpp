@@ -10,6 +10,7 @@
 
 
 struct cursor {
+    std::string cursors[2] = {"\033[2 q", "\033[6 q"};
     int row = 1;
     int column = 8;
     int offset = 8;
@@ -35,11 +36,14 @@ struct popup {
 struct screen {
     std::string modes[2] = {"command", "insert"};
     std::string cmdLine;
+    std::string RESET = "\033[0;48;5;234m";
     int verticalSize, horizontalSize, bottomLine, rightLine;
 
     int cursorLine = 0, cursorChar = 0, scrollIndex = 0, leftLine = 0;
     
     int topLine = 1;
 
-    void print(file, popup &, winsize, int);
+    void print(file, popup &, int);
+
+    void init(winsize);
 };

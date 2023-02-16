@@ -105,6 +105,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
+            printf("%s", Cursor.cursors[Mode].c_str());
             Screen.print(File, Popup, size, Mode);
             Cursor.move();
             Popup.print(Cursor);
