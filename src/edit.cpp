@@ -71,8 +71,7 @@ void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
 int edit::commandMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, mode &Mode, char &c) {
     int retVal = 0;
     if (c == 'i') { //  Insert mode
-       Mode = insert; 
-
+        Mode = insert; 
     } else if (c == 'a') {
         Cursor.column++;
         Screen.cursorChar++;

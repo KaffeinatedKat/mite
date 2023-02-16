@@ -31,5 +31,5 @@ struct lsp {
     void didOpen(file &, std::string);
     void didChange(file &, screen &, char);
     void completion(file &, screen &, popup &);
-    void parseResponse(file &, screen &, cursor &, popup &, winsize, int, char*);
+    void parseResponse(file &, screen &, cursor &, popup &, int, char*);
 };

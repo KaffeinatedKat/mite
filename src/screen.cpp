@@ -39,8 +39,15 @@ void popup::clr() {
 }
 
 
+void screen::init(winsize size) {
+    verticalSize = size.ws_row - 1;
+    horizontalSize = size.ws_col;
+    bottomLine = verticalSize;
+    rightLine = horizontalSize - 8;
+}
+
 //  FIXME: This fucntion is a mess
-void screen::print(file File, popup &Popup, winsize ScreenSize, int mode) {
+void screen::print(file File, popup &Popup, int mode) {
     int line = 0;
     int size;
     int start;
@@ -48,12 +55,7 @@ void screen::print(file File, popup &Popup, winsize ScreenSize, int mode) {
     std::string lineText;
     std::string viewableLine;
 
-    verticalSize = ScreenSize.ws_row - 1;
-    horizontalSize = ScreenSize.ws_col;
-    bottomLine = verticalSize;
-    rightLine = horizontalSize - 8;
-
-    printf("\033[H\033[J");
+    printf("\033[H\033[J%s", RESET.c_str());
 
     for (auto& it : File.vect) {
         start = -1;
@@ -101,15 +103,15 @@ void screen::print(file File, popup &Popup, winsize ScreenSize, int mode) {
                 }
 
                 if (end > horizontalSize - 8) {
-                    viewableLine.append("\x1b[0m");
+                    viewableLine.append(RESET);
                 } else if (end > size && end < size + (horizontalSize - 8)) {
-                    viewableLine.insert(end - size + 4, "\x1b[0m");
+                    viewableLine.insert(end - size + 4, RESET);
                 }
             }
 
-            printf("%-5d| %s\x1b[0m\n", line, viewableLine.c_str());
+            printf("%-5d| %s%s\n", line, viewableLine.c_str(), RESET.c_str());
         } else {
-            printf("%-5d| \x1b[0m\n", line);
+            printf("%-5d| %s\n", line, RESET.c_str());
         }
 
         if (line > bottomLine) {

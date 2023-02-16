@@ -246,7 +246,7 @@ void lsp::completion(file &File, screen &Screen, popup &Popup) {
 
 
 
-void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup, winsize size, int mode, char* response) {
+void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup, int mode, char* response) {
     Document responseJson;
     responseJson.Parse(response);
 
@@ -279,8 +279,6 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
     } else if (responseJson["method"].IsString() && strcmp(responseJson["method"].GetString(), "textDocument/publishDiagnostics") == 0) {
         struct error Err;
         std::string currentLine;
-        int start;
-        int end;
 
         printf("%s\n\n\n\n", sb.GetString());
 
@@ -304,7 +302,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
             
         }
 
-        Screen.print(File, Popup, size, mode);
+        Screen.print(File, Popup, mode);
         Cursor.move();
         Popup.print(Cursor);
         std::fflush(stdout);
@@ -322,6 +320,6 @@ void lsp::exit() {}
 void lsp::didOpen(file &, std::string) {}
 void lsp::didChange(file &, screen &, char) {}
 void lsp::completion(file &, screen &, popup &) {}
-void lsp::parseResponse(file &, screen &, cursor &, popup &, winsize, int, char*) {}
+void lsp::parseResponse(file &, screen &, cursor &, popup &, int, char*) {}
 
 #endif

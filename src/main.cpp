@@ -64,7 +64,8 @@ int main(int argc, char *argv[]) {
     File.filePath = "/home/coffee/github/mite/" + std::string(argv[1]);
     File.openFile();
     File.toString();
-    Screen.print(File, Popup, size, Mode);
+    Screen.init(size);
+    Screen.print(File, Popup, Mode);
     Cursor.move();
     Popup.listIndex = 1;
     std::fflush(stdout);
@@ -106,13 +107,13 @@ int main(int argc, char *argv[]) {
             }
 
             printf("%s", Cursor.cursors[Mode].c_str());
-            Screen.print(File, Popup, size, Mode);
+            Screen.print(File, Popup, Mode);
             Cursor.move();
             Popup.print(Cursor);
             std::fflush(stdout);
         }
         if (pfds[1].revents & POLLIN) { //  Language server has responded
-            Lsp.parseResponse(File, Screen, Cursor, Popup, size, Mode, Lsp.readJson());
+            Lsp.parseResponse(File, Screen, Cursor, Popup, Mode, Lsp.readJson());
         }
     }
 }
