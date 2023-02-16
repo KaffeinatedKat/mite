@@ -176,8 +176,10 @@ void lsp::didChange(file &File, screen &Screen, char c) {
 
     if (c == 13) { //  Newline insert 
         line--;
+        //  When a newline happens, update lsp on what the current line and
+        //  the previous line are.
         text = File.vect[Screen.cursorLine - 1];
-        text.append("\r\n\r\n");
+        text.append("\r\n" + File.vect[Screen.cursorLine] + "\r\n");
     }
 
     //  FIXME: this shouldn't have to be 2 edit commands

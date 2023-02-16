@@ -35,7 +35,8 @@ void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
             Undo.index = Popup.start[Popup.listIndex];
         } else {
             undoInsert = 0;
-            File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, "");
+            File.vect[Screen.cursorLine] = currentLine.substr(0, Screen.cursorChar);
+            File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, currentLine.substr(Screen.cursorChar));
             Cursor.row++;
             Screen.cursorLine++;
             Cursor.column = Cursor.offset;
