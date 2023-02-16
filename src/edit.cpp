@@ -73,6 +73,10 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
     if (c == 'i') { //  Insert mode
        Mode = insert; 
 
+    } else if (c == 'a') {
+        Cursor.column++;
+        Screen.cursorChar++;
+        Mode = insert;
     } else if (c == 'x') { //  Delete char
         File.vect[Screen.cursorLine].erase(Cursor.column - Cursor.offset, 1);
         retVal = 1;
