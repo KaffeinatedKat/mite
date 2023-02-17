@@ -1,3 +1,4 @@
+#include <climits>
 #include <cstdio>
 #include <stdio.h>
 #include <iostream>
@@ -51,6 +52,7 @@ int main(int argc, char *argv[]) {
     ioctl( 0, TIOCGWINSZ, (char *) &size );
     uncook();
     char c;
+    char cwd[PATH_MAX];
     std::string mode;
     std::string temp;
     int ready;
@@ -65,8 +67,7 @@ int main(int argc, char *argv[]) {
     Mode = command;
 
     signal(SIGINT, ctrlc);
-    File.filePath = "/home/coffee/github/mite/" + std::string(argv[1]);
-    File.openFile();
+    Screen.cmdLine = File.openFile(std::string(argv[1]));
     File.toString();
     Screen.init(size);
     Screen.print(File, Popup, Mode);
@@ -75,14 +76,14 @@ int main(int argc, char *argv[]) {
     std::fflush(stdout);
 
     pfds[0].fd = STDIN_FILENO;
-    pfds[0].events = POLLIN;    
+    pfds[0].events = POLLIN;
     
 #ifndef NO_LSP
-    Lsp.start("clangd");
+    Lsp.start(File);
     pfds[1].fd = Lsp.lspOut[0];
     pfds[1].events = POLLIN;
     Lsp.initialize();
-    Lsp.didOpen(File, "cpp");
+    Lsp.didOpen(File);
 #endif 
 
     while ((ready = poll(pfds, FDS, -1)) > 0) {

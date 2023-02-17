@@ -118,5 +118,5 @@ void screen::print(file File, popup &Popup, int mode) {
             break;
         }
     }
-    printf("< %s > %s", modes[mode].c_str(), cmdLine.c_str());
+    printf("\033[1m-- %s -- %s", modes[mode].c_str(), cmdLine.c_str());
 }

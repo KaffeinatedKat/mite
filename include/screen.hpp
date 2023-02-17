@@ -34,7 +34,7 @@ struct popup {
 
 
 struct screen {
-    std::string modes[2] = {"command", "insert"};
+    std::string modes[2] = {"NORMAL", "INSERT"};
     std::string cmdLine;
     std::string RESET = "\033[0m";
     int verticalSize, horizontalSize, bottomLine, rightLine;

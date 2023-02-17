@@ -1,8 +1,12 @@
 #pragma once
+#include <unistd.h>
 #include <string>
 #include <vector>
 #include <map>
 #include <fstream>
+#include <filesystem>
+
+#include "config.hpp"
 
 
 struct error {
@@ -14,13 +18,16 @@ struct error {
 struct file {
     std::map<int, error> errMap;
     std::vector<std::string> vect;
-    std::string filePath, string;
+    std::string filePath, string, languageId;
+    std::string languageServer = "NONE";
 
-    void openFile();
+    std::string openFile(std::string);
 
     void writeFile();
 
     void toString();
+
+    void getLangId();
 };
 
 

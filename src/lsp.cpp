@@ -5,9 +5,11 @@
 using namespace rapidjson;
 
 
-void lsp::start(std::string languageServer) {
-    int ret;
-    int jsonSize = 0;
+void lsp::start(file File) {
+    if (File.languageServer == "NONE") {
+        return;
+    }
+    running = true;
 
     //  Pipe stdin, stdout, and stderr from the language server
     if (pipe(lspIn) == -1) { err("pipe 1 failed"); }
@@ -19,14 +21,19 @@ void lsp::start(std::string languageServer) {
     if (pid == 0) {
         dup2(lspIn[0], 0);
         dup2(lspOut[1], 1);
-        dup2(lspErr[1], 2);
-        char *args[] = { (char *)languageServer.c_str(), NULL };
-        execvp(languageServer.c_str(), args);
+        //dup2(lspErr[1], 2);
+        char *args[] = {(char *) File.languageServer.c_str(), NULL };
+        execvp(File.languageServer.c_str(), args);
     }
 }
 
 
 char* lsp::readJson() {
+    if (running == false) { 
+        char* retVal = (char *) "";
+        return retVal;
+    }
+
     struct pollfd fd;
     char buf[2048] = {0};
     char *json = {0};
@@ -63,6 +70,8 @@ char* lsp::readJson() {
 //  like the rest of the functions
 
 void lsp::initialize() {
+    if (running == false) {return; }
+
     std::string initMsg;
     std::string initNotif;
     Document initializeMsg;
@@ -72,8 +81,6 @@ void lsp::initialize() {
 
     Document::AllocatorType& allocator = initializeMsg.GetAllocator();
     Document::AllocatorType& allocator2 = initNotification.GetAllocator();
-    size_t sz = allocator.Size();
-    size_t sz2 = allocator2.Size();
 
     initializeMsg.AddMember("jsonrpc", "2.0", allocator);
     initializeMsg.AddMember("id", 1, allocator);
@@ -112,6 +119,8 @@ void lsp::initialize() {
 
 
 void lsp::exit() {
+    if (running == false) { return; }
+
     const char* json = "{\"jsonrpc\": \"2.0\",\"method\": \"exit\",\"params\": {}}";
     std::string exitMsg;
 
@@ -126,21 +135,21 @@ void lsp::exit() {
 }
 
 
-void lsp::didOpen(file &File, std::string language) {
+void lsp::didOpen(file &File) {
+    if (running == false) { return; }
+
     std::string openMsg;
     const char* json = "{\"jsonrpc\": \"2.0\",\"method\": \"textDocument/didOpen\",\"params\":{\"textDocument\": {\"uri\": \"\",\"languageId\": \"\",\"version\": 1,\"text\": \"\"}}}";
     std::string uri = "file://" + File.filePath;
-    std::string text = "int main() { \r\nint dogg = 1;\r\ndog";
 
     lock.lock();
     
     Document didOpen;
     didOpen.Parse(json);
     Document::AllocatorType& allocator = didOpen.GetAllocator();
-    size_t sz = allocator.Size();
 
     didOpen["params"]["textDocument"]["uri"].SetString(uri.c_str(), allocator);
-    didOpen["params"]["textDocument"]["languageId"].SetString(language.c_str(), allocator);
+    didOpen["params"]["textDocument"]["languageId"].SetString(File.languageId.c_str(), allocator);
     didOpen["params"]["textDocument"]["text"].SetString(File.string.c_str(), allocator);
 
     StringBuffer sb;
@@ -157,6 +166,8 @@ void lsp::didOpen(file &File, std::string language) {
 
 
 void lsp::didChange(file &File, screen &Screen, char c) {
+    if (running == false) { return; }
+
     const char* json = "{\"jsonrpc\": \"2.0\",\"method\": \"textDocument/didChange\", \"params\": {\"textDocument\": {\"uri\": \"\",\"version\": \"\"},\"contentChanges\": [{\"range\": {\"start\": {\"line\": 0, \"character\": 0}, \"end\": {\"line\": 0, \"character\": 0}},\"text\": \"\"}, {\"range\": {\"start\": {\"line\": 0, \"character\": 0}, \"end\": {\"line\": 0, \"character\": 0}},\"text\": \"\"}]}}";
     std::string didChangeMsg;
     std::string uri = "file://" + File.filePath;
@@ -213,6 +224,8 @@ void lsp::didChange(file &File, screen &Screen, char c) {
 
 
 void lsp::completion(file &File, screen &Screen, popup &Popup) {
+    if (running == false) { return; }
+
     std::string completionMsg;
     const char* json = "{\"jsonrpc\": \"2.0\",\"method\": \"textDocument/completion\",\"id\": 1,\"params\": {\"textDocument\": {\"uri\": \"\"},\"position\": {\"line\": 0,\"character\": 0}}}";
     char* response;
@@ -247,6 +260,7 @@ void lsp::completion(file &File, screen &Screen, popup &Popup) {
 
 
 void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup, int mode, char* response) {
+    if (running == false) { return; }
     Document responseJson;
     responseJson.Parse(response);
 
@@ -310,7 +324,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 }
 #else
 
-void lsp::start(std::string) {}
+void lsp::start(file) {}
 char* lsp::readJson() {
     char* retVal;
     return retVal;
