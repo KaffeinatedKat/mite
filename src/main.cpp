@@ -44,6 +44,10 @@ void ctrlc(int) {}
 
 
 int main(int argc, char *argv[]) {
+    if (argc < 2) {
+        printf("mite: u forgor, where's my file at?\n");
+        exit(0);
+    }
     ioctl( 0, TIOCGWINSZ, (char *) &size );
     uncook();
     char c;
