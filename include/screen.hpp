@@ -43,7 +43,7 @@ struct screen {
     
     int topLine = 1;
 
-    void print(file, popup &, int);
+    void print(file, int);
 
     void init(winsize);
 };

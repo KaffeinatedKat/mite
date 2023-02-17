@@ -47,7 +47,7 @@ void screen::init(winsize size) {
 }
 
 //  FIXME: This fucntion is a mess
-void screen::print(file File, popup &Popup, int mode) {
+void screen::print(file File, int mode) {
     int line = 0;
     int size;
     int start;

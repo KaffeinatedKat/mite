@@ -25,7 +25,7 @@ struct edit {
 
     void insertMode(file &, screen &, cursor &, popup &, char &);
 
-    int commandMode(file &, screen &, cursor &, popup &, mode &, char &);
+    int commandMode(file &, screen &, cursor &, mode &, char &);
 
     void undo(file &, screen &, cursor &);
 

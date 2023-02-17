@@ -36,6 +36,6 @@ struct lsp {
     void exit();
     void didOpen(file &);
     void didChange(file &, screen &, char);
-    void completion(file &, screen &, popup &);
+    void completion(file &, screen &);
     void parseResponse(file &, screen &, cursor &, popup &, int, char*);
 };

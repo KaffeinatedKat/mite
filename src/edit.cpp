@@ -62,13 +62,13 @@ void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
     Undo.action = undoInsert;
 
     //  If the index is not at the end, remove everything under it to prevent breaking the stack
-    if (!(++undoIndex == undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
+    if (!(++undoIndex == (int) undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
 
     undoStack.push_back(Undo);
 
 }
 
-int edit::commandMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, mode &Mode, char &c) {
+int edit::commandMode(file &File, screen &Screen, cursor &Cursor, mode &Mode, char &c) {
     int retVal = 0;
     if (c == 'i') { //  Insert mode
         Mode = insert; 
@@ -89,7 +89,7 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
         if (!(Screen.cursorLine < 1)) { Screen.cursorLine -= 1; }
 
     } else if (c == 'l') { //  Cursor right
-        if (Screen.cursorChar <= File.vect[Screen.cursorLine].length()) { Screen.cursorChar++; }
+        if (Screen.cursorChar <= (int) File.vect[Screen.cursorLine].length()) { Screen.cursorChar++; }
         if (!(Cursor.column == Screen.horizontalSize)) { Cursor.column++; }
 
     } else if (c == 'h') { // Cursor left
@@ -125,7 +125,7 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
         }
     }
 
-    if (Screen.cursorChar > File.vect[Screen.cursorLine].length()) {
+    if (Screen.cursorChar > (int) File.vect[Screen.cursorLine].length()) {
        endOfTheLine(File, Screen, Cursor);
     }
 

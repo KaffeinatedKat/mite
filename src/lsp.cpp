@@ -223,12 +223,11 @@ void lsp::didChange(file &File, screen &Screen, char c) {
 }
 
 
-void lsp::completion(file &File, screen &Screen, popup &Popup) {
+void lsp::completion(file &File, screen &Screen) {
     if (running == false) { return; }
 
     std::string completionMsg;
     const char* json = "{\"jsonrpc\": \"2.0\",\"method\": \"textDocument/completion\",\"id\": 1,\"params\": {\"textDocument\": {\"uri\": \"\"},\"position\": {\"line\": 0,\"character\": 0}}}";
-    char* response;
     std::string uri = "file://" + File.filePath;
 
     lock.lock();
@@ -316,7 +315,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
             
         }
 
-        Screen.print(File, Popup, mode);
+        Screen.print(File, mode);
         Cursor.move();
         Popup.print(Cursor);
         std::fflush(stdout);
@@ -333,7 +332,7 @@ void lsp::initialize() {}
 void lsp::exit() {}
 void lsp::didOpen(file &, std::string) {}
 void lsp::didChange(file &, screen &, char) {}
-void lsp::completion(file &, screen &, popup &) {}
+void lsp::completion(file &, screen &) {}
 void lsp::parseResponse(file &, screen &, cursor &, popup &, int, char*) {}
 
 #endif

@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) {
     ioctl( 0, TIOCGWINSZ, (char *) &size );
     uncook();
     char c;
-    char cwd[PATH_MAX];
     std::string mode;
     std::string temp;
     int ready;
@@ -70,7 +69,7 @@ int main(int argc, char *argv[]) {
     Screen.cmdLine = File.openFile(std::string(argv[1]));
     File.toString();
     Screen.init(size);
-    Screen.print(File, Popup, Mode);
+    Screen.print(File, Mode);
     Cursor.move();
     Popup.listIndex = 1;
     std::fflush(stdout);
@@ -103,16 +102,16 @@ int main(int argc, char *argv[]) {
                 File.errMap.clear();
                 Edit.insertMode(File, Screen, Cursor, Popup, c);
                 Lsp.didChange(File, Screen, c);
-                Lsp.completion(File, Screen, Popup);
+                Lsp.completion(File, Screen);
             } else if (Mode == command) {
-                if (Edit.commandMode(File, Screen, Cursor, Popup, Mode, c) == 1) {
+                if (Edit.commandMode(File, Screen, Cursor, Mode, c) == 1) {
                     File.errMap.clear();
                     Lsp.didChange(File, Screen, c);
                 }
             }
 
             printf("%s", Cursor.cursors[Mode].c_str());
-            Screen.print(File, Popup, Mode);
+            Screen.print(File, Mode);
             Cursor.move();
             Popup.print(Cursor);
             std::fflush(stdout);

@@ -62,15 +62,15 @@ void file::toString() {
 }
 
 void file::getLangId() {
-    std::filesystem::path path = std::filesystem::path(filePath);
+    std::string fileEnd = std::filesystem::path(filePath).extension();
 
-    if (path.extension() == ".cpp" || path.extension() == ".hpp") {
+    if (fileEnd == ".cpp" || fileEnd == ".hpp") {
         languageServer = cppServer;
         languageId = "cpp";
-    } else if (path.extension() == ".c" || path.extension() == ".h") {
+    } else if (fileEnd == ".c" || fileEnd == ".h") {
         languageServer = cServer;
         languageId = "c";
-    } else if (path.extension() == ".rs") {
+    } else if (fileEnd == ".rs") {
         languageServer = rustServer;
         languageId = "rust";
     }
