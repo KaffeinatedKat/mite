@@ -5,7 +5,7 @@ mite is a "lightweight" modal command line text editor inspired by vim
 I am creating mite as a learning project, and it has no real purpose and/or defining features making it worth using over vim
 
 ### What's with the name?
-mite is an acronym for "mild inefficient text editor"
+mite is an acronym for "mildly inefficient text editor"
 
 The name comes from [idkso's](https://github.com/idkso) critism of my usage of a vector data structor instead of something more efficient like ropes
 
