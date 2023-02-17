@@ -5,7 +5,7 @@ HEADERS := $(shell fd -e hpp . $(HEADER_ROOT))
 OBJ := $(SRC:%.cpp=%.o)
 WARNINGS := -Wall -Wextra -Wpedantic -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn -Wsuggest-attribute=cold -Walloca -Wduplicated-branches -Wduplicated-cond -Wfloat-equal -Wlarger-than=4KiB -Wpointer-arith
 OUT ?= mite
-CXXFLAGS ?= -std=c++11 -pipe
+CXXFLAGS ?= -std=c++17 -pipe
 INCLUDE := -Iinclude
 LIB :=
 
@@ -38,7 +38,7 @@ $(OUT): $(OBJ)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $(LIB)
 
 %.o: %.cpp $(HEADERS)
-	$(CXX) -c -o $@ $(INCLUDE) $(CXXFLAGS) $<
+	$(CXX) -c -o $@ $(INCLUDE) $(WARNINGS) $(CXXFLAGS) $<
 
 compile_flags.txt: Makefile
 	rm -f compile_flags.txt
