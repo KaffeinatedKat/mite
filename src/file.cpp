@@ -73,5 +73,8 @@ void file::getLangId() {
     } else if (fileEnd == ".rs") {
         languageServer = rustServer;
         languageId = "rust";
+    } else if (fileEnd == ".java") {
+        languageServer = javaServer;
+        languageId = "java";
     }
 }
