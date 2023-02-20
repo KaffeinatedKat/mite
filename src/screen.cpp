@@ -33,6 +33,7 @@ void popup::append(std::string value) {
 
 void popup::clr() {
     list.clear();
+    line.clear();
     text.clear();
     start.clear();
     end.clear();
