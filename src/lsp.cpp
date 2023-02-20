@@ -276,11 +276,13 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 
         for (Value::ConstValueIterator it = responseJson["result"]["items"].Begin(); it != responseJson["result"]["items"].End(); ++it) {
             const Value& items = *it;
-            Popup.append(items["filterText"].GetString());
-            Popup.start.push_back(items["textEdit"]["range"]["start"]["character"].GetInt());
-            Popup.end.push_back(items["textEdit"]["range"]["end"]["character"].GetInt());
-            Popup.line.push_back(items["textEdit"]["range"]["start"]["line"].GetInt());
-            Popup.text.push_back(items["textEdit"]["newText"].GetString());
+            if (items["filterText"].IsString() == 1) {
+                Popup.append(items["filterText"].GetString());
+                Popup.start.push_back(items["textEdit"]["range"]["start"]["character"].GetInt());
+                Popup.end.push_back(items["textEdit"]["range"]["end"]["character"].GetInt());
+                Popup.line.push_back(items["textEdit"]["range"]["start"]["line"].GetInt());
+                Popup.text.push_back(items["textEdit"]["newText"].GetString());
+            }
         }
 
         Popup.print(Cursor);
