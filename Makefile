@@ -14,7 +14,7 @@ all: $(OUT) compile_flags.txt
 .DEFAULT_GOAL = debug
 
 debug: CXX = g++
-debug: CXXFLAGS += -Og -ggdb3
+debug: CXXFLAGS += -Og -ggdb3 -DDEBUG
 debug: all
 
 analyze: CXX = g++

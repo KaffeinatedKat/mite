@@ -21,7 +21,9 @@ void lsp::start(file File) {
     if (pid == 0) {
         dup2(lspIn[0], 0);
         dup2(lspOut[1], 1);
-        //dup2(lspErr[1], 2);
+#ifndef DEBGUG
+        dup2(lspErr[1], 2);
+#endif
         char *args[] = {(char *) File.languageServer.c_str(), NULL };
         execvp(File.languageServer.c_str(), args);
     }
@@ -112,7 +114,6 @@ void lsp::initialize() {
     StringBuffer sb3;
     PrettyWriter<StringBuffer> writer3(sb3);
     res.Accept(writer3);
-    //printf("\n\n%s\n\n", sb3.GetString());
 
     write(lspIn[1], initNotif.c_str(), initNotif.length());
 }
@@ -155,8 +156,6 @@ void lsp::didOpen(file &File) {
     StringBuffer sb;
     PrettyWriter<StringBuffer> writer(sb);
     didOpen.Accept(writer);
-
-    //printf("\n\n%s\n\n", sb.GetString());
 
     openMsg = "Content-Length: " + std::to_string(std::string(sb.GetString()).length()) + "\r\n\r\n" + sb.GetString();
     write(lspIn[1], openMsg.c_str(), openMsg.length());
@@ -214,7 +213,9 @@ void lsp::didChange(file &File, screen &Screen, char c) {
     PrettyWriter<StringBuffer> writer(sb);
     didChange.Accept(writer);
 
+#ifdef DEBUG
     printf("\n\n%s\n\n", sb.GetString());
+#endif
 
     didChangeMsg = "Content-Length: " + std::to_string(std::string(sb.GetString()).length()) + "\r\n\r\n" + sb.GetString();
     write(lspIn[1], didChangeMsg.c_str(), didChangeMsg.length());
@@ -246,11 +247,12 @@ void lsp::completion(file &File, screen &Screen) {
     PrettyWriter<StringBuffer> writer(sb);
     completion.Accept(writer);
 
+#ifdef DEBUG
     printf("\n\n%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", sb.GetString());
+#endif
 
     completionMsg = "Content-Length: " + std::to_string(std::string(sb.GetString()).length()) + "\r\n\r\n" + sb.GetString();
     write(lspIn[1], completionMsg.c_str(), completionMsg.length());
-    //printf("\n\n%s\n\n", response);
 
     lock.unlock();
 
@@ -267,8 +269,9 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
     PrettyWriter<StringBuffer> writer(sb);
     responseJson.Accept(writer);
 
-    //printf("\n\n%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", sb.GetString());
-
+#ifdef DEBUG
+    printf("\n\n%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", sb.GetString());
+#endif
 
     //  Completion response, parse items and add to popup list
     if (responseJson["result"].IsObject() && responseJson["result"]["items"].IsArray()) {
@@ -295,7 +298,9 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
         struct error Err;
         std::string currentLine;
 
+#ifdef DEBUG
         printf("%s\n\n\n\n", sb.GetString());
+#endif
 
         for (Value::ConstValueIterator it = responseJson["params"]["diagnostics"].Begin(); it != responseJson["params"]["diagnostics"].End(); ++it) {
             const Value& issue = *it;
