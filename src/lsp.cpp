@@ -1,4 +1,5 @@
 #include "lsp.hpp"
+#include "config.hpp"
 
 #ifndef NO_LSP
 
@@ -262,6 +263,7 @@ void lsp::completion(file &File, screen &Screen) {
 
 void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup, int mode, char* response) {
     if (running == false) { return; }
+    std::string color = RED;
     Document responseJson;
     responseJson.Parse(response);
 
@@ -269,7 +271,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
     PrettyWriter<StringBuffer> writer(sb);
     responseJson.Accept(writer);
 
-#ifdef DEBUG
+#ifdef VERBOSE
     printf("\n\n%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", sb.GetString());
 #endif
 
@@ -279,7 +281,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 
         //  Dont show garbage incomplete autocomplete results, lots of 
         //  useless clutter
-        if (responseJson["result"]["isIncomplete"].GetBool() == true) {
+        if (responseJson["result"]["isIncomplete"].GetBool() == true && !(LspShowIncomplete)) {
             return;
         }
 
@@ -310,6 +312,11 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 
         for (Value::ConstValueIterator it = responseJson["params"]["diagnostics"].Begin(); it != responseJson["params"]["diagnostics"].End(); ++it) {
             const Value& issue = *it;
+
+            if (issue["tags"].IsArray() == 1) {
+                color = YELLOW;
+            }
+
             Err.line = issue["range"]["start"]["line"].GetInt();
             currentLine = File.vect[Err.line];
             Err.lineText = File.vect[Err.line];
@@ -322,7 +329,8 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
             //Err.lineText.insert(Err.start, "\033[9m");
             //Err.lineText.insert(Err.end + 4, "\033[0m");
         
-            Err.lineText.append("  \033[1;31m");
+            Err.lineText.append("  \x1b[1m");
+            Err.lineText.append(color);
             Err.lineText.append(issue["message"].GetString());
             File.errMap[Err.line] = Err;
             
