@@ -1,7 +1,7 @@
 #include "edit.hpp"
 
 
-void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, char &c) {
+int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, char &c) {
     std::vector<int> action;
     std::string currentLine = File.vect[Screen.cursorLine];
     std::string lineBegin;
@@ -13,6 +13,8 @@ void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
     undoInstruction Undo;
 
     if (c == 127) { //  Backspace
+        if (Screen.cursorChar <= 0) { return 0; }
+
         undoInsert = 1;
         File.vect[Screen.cursorLine].erase(index - 1, 1);
         Cursor.column--;
@@ -65,7 +67,7 @@ void edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, 
     if (!(++undoIndex == (int) undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
 
     undoStack.push_back(Undo);
-
+    return 1;
 }
 
 int edit::commandMode(file &File, screen &Screen, cursor &Cursor, mode &Mode, char &c) {

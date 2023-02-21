@@ -100,9 +100,10 @@ int main(int argc, char *argv[]) {
                 Popup.clr();
             } else if (Mode == insert) {
                 File.errMap.clear();
-                Edit.insertMode(File, Screen, Cursor, Popup, c);
-                Lsp.didChange(File, Screen, c);
-                Lsp.completion(File, Screen);
+                if (Edit.insertMode(File, Screen, Cursor, Popup, c) == 1) {
+                    Lsp.didChange(File, Screen, c);
+                    Lsp.completion(File, Screen);
+                }
             } else if (Mode == command) {
                 if (Edit.commandMode(File, Screen, Cursor, Mode, c) == 1) {
                     File.errMap.clear();
