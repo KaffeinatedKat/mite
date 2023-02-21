@@ -5,6 +5,7 @@
 
 #include "file.hpp"
 #include "screen.hpp"
+#include "command.hpp"
 
 enum mode {
     command = 0,
@@ -25,7 +26,7 @@ struct edit {
 
     int insertMode(file &, screen &, cursor &, popup &, char &);
 
-    int commandMode(file &, screen &, cursor &, mode &, char &);
+    int commandMode(file &, screen &, cursor &, lsp &, struct::command &, mode &, char &);
 
     void undo(file &, screen &, cursor &);
 

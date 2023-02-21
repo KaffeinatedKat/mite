@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include "file.hpp"
+#include "command.hpp"
 #include "edit.hpp"
 #include "screen.hpp"
 #include "lsp.hpp"
@@ -41,6 +42,12 @@ void cook() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig);
 }
 
+void quit(lsp &Lsp) {
+    Lsp.exit();
+    cook();
+    exit(0);
+}
+
 void ctrlc(int) {}
 
 
@@ -61,6 +68,7 @@ int main(int argc, char *argv[]) {
     file File;
     screen Screen;
     edit Edit;
+    struct::command Cmd;
     popup Popup;
     lsp Lsp;
     Mode = command;
@@ -89,12 +97,6 @@ int main(int argc, char *argv[]) {
         if (pfds[0].revents & POLLIN) { //  User has typed
             read(STDIN_FILENO, &c, 1);
 
-            if (c == 'q') {
-                Lsp.exit();
-                cook();
-                exit(0);
-            }
-
             if (c == 27) { //  Command mode on ESC
                 Mode = command;
                 Popup.clr();
@@ -107,7 +109,7 @@ int main(int argc, char *argv[]) {
                     Lsp.completion(File, Screen);
                 }
             } else if (Mode == command) {
-                if (Edit.commandMode(File, Screen, Cursor, Mode, c) == 1) {
+                if (Edit.commandMode(File, Screen, Cursor, Lsp, Cmd, Mode, c) == 1) {
                     File.errMap.clear();
                     Lsp.didChange(File, Screen, c);
                 }

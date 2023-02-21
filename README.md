@@ -37,8 +37,10 @@ mite uses bindings identical to vim
 
 `esc` to go back to command mode
 
-*vim like command line is currently not implimented*
+`:` to access the vim-like command line
 
-`w` writes the file
+`:w` to write file
 
-`q` to exit
+`:q` to exit
+
+`:wq` to write and exit

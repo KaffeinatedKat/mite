@@ -129,7 +129,7 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
     return 1;
 }
 
-int edit::commandMode(file &File, screen &Screen, cursor &Cursor, mode &Mode, char &c) {
+int edit::commandMode(file &File, screen &Screen, cursor &Cursor, lsp &Lsp, struct::command &Cmd, mode &Mode, char &c) {
     int retVal = 0;
 
     if (c == 'i') { //  Insert mode
@@ -170,16 +170,24 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, mode &Mode, ch
         //  some point
         if (Screen.cursorChar > 0) { Screen.cursorChar--; }
 
-    } else if (c == 'w') { //  Write to file
-        File.writeFile();
-        Screen.cmdLine = "File hath been wroteth";
-
     } else if (c == 127) { //  Delete line
         //  FIXME: this shouldn't exist, does not work with lsp. Needs to
         //  be replaced with 'dd' when the command line is implemented 
         File.vect.erase(File.vect.begin() + Screen.cursorLine);
 
-    } 
+    } else if (c == ':') { //  Command line
+        std::string command;
+        //  Make the command line empty and reprint the screen to update it,
+        //  so whatever message may exist there is not in the way of the 
+        //  command being typed
+        Screen.cmdLine = "";
+        Screen.print(File, 0);
+        //  Get the command from the user then execute that command if Cmd.get
+        //  returns 1 (command to execute)
+        if (Cmd.get(Screen, Cursor, command) == 1) {
+            Cmd.execute(File, Screen, Lsp, command);
+        }
+    }
 
 #ifdef DEBUG
     else if (c == 't') { //  Debug print the undo stack 
