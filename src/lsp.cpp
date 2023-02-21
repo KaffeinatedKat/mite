@@ -277,6 +277,12 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
     if (responseJson["result"].IsObject() && responseJson["result"]["items"].IsArray()) {
         Popup.clr();
 
+        //  Dont show garbage incomplete autocomplete results, lots of 
+        //  useless clutter
+        if (responseJson["result"]["isIncomplete"].GetBool() == true) {
+            return;
+        }
+
         for (Value::ConstValueIterator it = responseJson["result"]["items"].Begin(); it != responseJson["result"]["items"].End(); ++it) {
             const Value& items = *it;
             if (items["filterText"].IsString() == 1) {
