@@ -13,17 +13,51 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
     undoInstruction Undo;
 
     if (c == 127) { //  Backspace
-        if (Screen.cursorChar <= 0) { return 0; }
 
-        undoInsert = 1;
-        File.vect[Screen.cursorLine].erase(index - 1, 1);
-        Cursor.column--;
-        Screen.cursorChar--;
-        Undo.text = File.vect[Screen.cursorLine][index - 1];
-        Undo.index = Cursor.column - Cursor.offset - 1;
-        
-    } else if (c == 13) { //  Newline
-        if (Popup.list.size() > 0) { //  Do a completion instead of a newline if possible
+        //  If backspace is pressed at the beginning of a line then
+        //  we want to combine the current and top lines together.
+        //
+        //  Move the cursor to the end of the line above, then
+        //  move the contents of the line below to the end of the 
+        //  current line and delete the line below
+        //
+        //  FIXME: can delete lines into the shadow realm if
+        //  deleting from the beginning of the top line
+        if (Screen.cursorChar <= 0) {
+            undoInsert = 1;
+            Screen.cursorLine--;
+            Cursor.row--;
+            endOfTheLine(File, Screen, Cursor);
+            File.vect[Screen.cursorLine].append(File.vect[Screen.cursorLine + 1]);
+            File.vect.erase(File.vect.begin() + Screen.cursorLine + 1);
+
+        //  If not then we want to do a normal delete.
+        //
+        //  Delete the character behind the cursor, then move the
+        //  cursor back one column to reflect the newly deleted
+        //  character
+        } else {
+            undoInsert = 1;
+            File.vect[Screen.cursorLine].erase(index - 1, 1);
+            Cursor.column--;
+            Screen.cursorChar--;
+            Undo.text = File.vect[Screen.cursorLine][index - 1];
+            Undo.index = Cursor.column - Cursor.offset - 1;
+        }
+
+
+    } else if (c == 13) { //  Newline (enter has been pressed)
+
+        //  If the popup list contains items then we want to do an 
+        //  autocomplete instead of a newline. 
+        //
+        //  We replace the range of the autocomplete's end index minus the 
+        //  start index in the current line with the autocomplete text.
+        //  Then add the length of the autocomplete text minus the length of 
+        //  the ranges which puts the cursor at the end of the newly inserted
+        //  text. Then clear the autocomplete list to prevent autocompleting the
+        //  same text again.
+        if (Popup.list.size() > 0) {
             undoInsert = 0;
             length = Popup.end[Popup.listIndex] - Popup.start[Popup.listIndex];
             File.vect[Screen.cursorLine].replace(Popup.start[Popup.listIndex], length, Popup.text[Popup.listIndex]);
@@ -35,6 +69,15 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
             c = 10;
             Undo.text = Popup.text[Popup.listIndex];
             Undo.index = Popup.start[Popup.listIndex];
+
+        //  If not, then we want to insert a newline by splitting the current
+        //  line into 2 lines at the cursor. This both works for splitting 
+        //  a line and also creating new empty lines
+        //
+        //  Make the current line only include the text after the cursor's 
+        //  current position, then add a new line below the current line
+        //  with all the text after the cursor, move the cursor down to 
+        //  reflect these changes
         } else {
             undoInsert = 0;
             File.vect[Screen.cursorLine] = currentLine.substr(0, Screen.cursorChar);
@@ -46,7 +89,16 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
             Undo.text = "\r\n";
         }
 
-    } else { //  Insert char
+    //  If none of the other if statements have gone through, then
+    //  it is probably a character we want to insert into the text.
+    //
+    //  Split the current line into 2 substrings, one before and one
+    //  after the cursor. Push the new char to the end of the beginning
+    //  substring then set the current line to the combination of the
+    //  2 substrings
+    //
+    //  FIXME: This should use string.insert instead of substring
+    } else {
         undoInsert = 0;
         lineBegin = currentLine.substr(0, index);
         lineEnd = currentLine.substr(index);
@@ -58,15 +110,22 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
         Undo.index = Cursor.column - Cursor.offset - 1;
     }
 
-    //  Create undo instruction, [line, index, (insert), char]
-
+    //  Undo instructions are created above by each case and follow the format 
+    //  of [line, index, mode, text]. Here we add the new instruction to the 
+    //  undo stack.
     Undo.line = Screen.cursorLine;
     Undo.action = undoInsert;
 
-    //  If the index is not at the end, remove everything under it to prevent breaking the stack
+    //  If the undo index is not at the end of the stack, remove everything 
+    //  under it to prevent breaking the text. Otherwise you can undo into
+    //  text that may or may not exist on the document breaking things in a
+    //  weird way.
     if (!(++undoIndex == (int) undoStack.size())) { undoStack.erase(undoStack.begin() + undoIndex, undoStack.end()); }
 
     undoStack.push_back(Undo);
+
+    //  Return 1 to signify a change in the document to decide wether or 
+    //  not to call Lsp.didChange();
     return 1;
 }
 
