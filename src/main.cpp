@@ -101,6 +101,8 @@ int main(int argc, char *argv[]) {
             } else if (Mode == insert) {
                 File.errMap.clear();
                 if (Edit.insertMode(File, Screen, Cursor, Popup, c) == 1) {
+                    //  FIXME: lsp does not update with new backspace line up thingy
+                    //  mabober
                     Lsp.didChange(File, Screen, c);
                     Lsp.completion(File, Screen);
                 }

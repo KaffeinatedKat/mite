@@ -23,7 +23,7 @@ struct edit {
     std::vector<undoInstruction> undoStack;
     int undoIndex = -1;
 
-    void insertMode(file &, screen &, cursor &, popup &, char &);
+    int insertMode(file &, screen &, cursor &, popup &, char &);
 
     int commandMode(file &, screen &, cursor &, mode &, char &);
 

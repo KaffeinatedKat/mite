@@ -56,7 +56,7 @@ void screen::print(file File, int mode) {
     std::string lineText;
     std::string viewableLine;
 
-    printf("\033[H\033[J%s", RESET.c_str());
+    printf("\033[H\033[J%s", RESET);
 
     for (auto& it : File.vect) {
         start = -1;
@@ -110,9 +110,9 @@ void screen::print(file File, int mode) {
                 }
             }
 
-            printf("%-5d| %s%s\n", line, viewableLine.c_str(), RESET.c_str());
+            printf("%-5d| %s%s\n", line, viewableLine.c_str(), RESET);
         } else {
-            printf("%-5d| %s\n", line, RESET.c_str());
+            printf("%-5d| %s\n", line, RESET);
         }
 
         if (line > bottomLine) {

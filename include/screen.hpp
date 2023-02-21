@@ -7,6 +7,7 @@
 #include <termios.h>
 
 #include "file.hpp"
+#include "config.hpp"
 
 
 struct cursor {
@@ -36,7 +37,6 @@ struct popup {
 struct screen {
     std::string modes[2] = {"NORMAL", "INSERT"};
     std::string cmdLine;
-    std::string RESET = "\033[0m";
     int verticalSize, horizontalSize, bottomLine, rightLine;
 
     int cursorLine = 0, cursorChar = 0, scrollIndex = 0, leftLine = 0;
