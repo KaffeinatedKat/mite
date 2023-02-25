@@ -17,10 +17,6 @@
 #include "screen.hpp"
 #include "file.hpp"
 
-//  Language server paths per language
-#define cppServer   "clangd"
-#define cServer     "clangd"
-
 static std::mutex lock;
 
 struct lsp {
