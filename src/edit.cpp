@@ -24,7 +24,8 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
         //  FIXME: can delete lines into the shadow realm if
         //  deleting from the beginning of the top line
         if (Screen.cursorChar <= 0) {
-            undoInsert = 1;
+            undoInsert = NEWLINE;
+
             Screen.cursorLine--;
             Cursor.row--;
             endOfTheLine(File, Screen, Cursor);
@@ -38,10 +39,11 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
         //  character
         } else {
             undoInsert = 1;
+            Undo.text = File.vect[Screen.cursorLine][index - 1];
+            
             File.vect[Screen.cursorLine].erase(index - 1, 1);
             Cursor.column--;
             Screen.cursorChar--;
-            Undo.text = File.vect[Screen.cursorLine][index - 1];
             Undo.index = Cursor.column - Cursor.offset - 1;
         }
 
@@ -59,6 +61,9 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
         //  same text again.
         if (Popup.list.size() > 0) {
             undoInsert = 0;
+            Undo.text = Popup.text[Popup.listIndex];
+            Undo.index = Popup.start[Popup.listIndex];
+            
             length = Popup.end[Popup.listIndex] - Popup.start[Popup.listIndex];
             File.vect[Screen.cursorLine].replace(Popup.start[Popup.listIndex], length, Popup.text[Popup.listIndex]);
             Screen.cursorChar += Popup.text[Popup.listIndex].length() - length;
@@ -67,26 +72,27 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
             //  Change c to something other than 13, otherwise Lsp.didChange()
             //  will tell the server to add a newline instead of the completion
             c = 10;
-            Undo.text = Popup.text[Popup.listIndex];
-            Undo.index = Popup.start[Popup.listIndex];
 
         //  If not, then we want to insert a newline by splitting the current
         //  line into 2 lines at the cursor. This both works for splitting 
         //  a line and also creating new empty lines
         //
-        //  Make the current line only include the text after the cursor's 
+        //  Make the current line only include the text before the cursor's 
         //  current position, then add a new line below the current line
         //  with all the text after the cursor, move the cursor down to 
         //  reflect these changes
         } else {
-            undoInsert = 0;
+            undoInsert = REMOVELINE;
+            Undo.index = Screen.cursorChar;
+            Undo.text = "\r\n";
+            Undo.index = Screen.cursorChar;
+
             File.vect[Screen.cursorLine] = currentLine.substr(0, Screen.cursorChar);
             File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, currentLine.substr(Screen.cursorChar));
             if (!(Cursor.row >= Screen.verticalSize)) { Cursor.row++; }
             Screen.cursorLine++;
             Cursor.column = Cursor.offset;
             Screen.cursorChar = 0;
-            Undo.text = "\r\n";
         }
 
     //  If none of the other if statements have gone through, then
@@ -110,9 +116,8 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
         Undo.index = Cursor.column - Cursor.offset - 1;
     }
 
-    //  Undo instructions are created above by each case and follow the format 
-    //  of [line, index, mode, text]. Here we add the new instruction to the 
-    //  undo stack.
+    //  Undo instruction variables are set for each case above.
+    //  For the variables that are the same no matter the case, we set them here
     Undo.line = Screen.cursorLine;
     Undo.action = undoInsert;
     Undo.cursorLine = Cursor.row;
@@ -244,32 +249,38 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, lsp &Lsp, stru
 }
 
 void edit::undo(file &File, screen &Screen, cursor &Cursor) {
-    //  undoStack instruction format [line, index, action (0-1), char]
-    //
     //  FIXME: this is weird and half working. Insert action does not work
     //  and needs to work with newlines 
 
     undoInstruction Undo = undoStack[undoIndex];
-    std::string lineBegin = File.vect[Undo.line].substr(0, Undo.index);
-    std::string lineEnd = File.vect[Undo.line].substr(Undo.index);
+    //std::string lineBegin = File.vect[Undo.line].substr(0, Undo.index);
+    //std::string lineEnd = File.vect[Undo.line].substr(Undo.index);
     Cursor.row = Undo.cursorLine;
     Cursor.column = Cursor.offset + Undo.index + 1;
     Screen.cursorLine = Undo.line;
     Screen.topLine = Undo.topLine;
     Screen.bottomLine = Undo.bottomLine;
 
-    //  FIXME: this doesnt do anything?
-    if (Undo.action == 1) {  //  Insert action
+    //  FIXME: this es no bueno
+    if (Undo.action == INSERT) {  //  Insert action
         //  Append the undo text to the end of the beginning
         //  substring
-        lineBegin.append(Undo.text.c_str());
-        Cursor.column++;
+        //lineBegin.append(Undo.text.c_str());
+        //Cursor.column++;
 
-    } else if (Undo.action == 0) { //  Delete action
+    } else if (Undo.action == DELETE) { //  Delete action
         //  Remove the length of the undo text from the undo line
         File.vect[Undo.line].erase(Undo.index, Undo.text.length());
         Cursor.column--;
 
+    } else if (Undo.action == NEWLINE) {
+        
+    } else if (Undo.action == REMOVELINE) {
+        File.vect[Undo.line - 1].append(File.vect[Undo.line]);
+        File.vect.erase(File.vect.begin() + Undo.line);
+        Cursor.row--;
+        Cursor.column--;
+        Screen.cursorLine--;
     }
     undoIndex--;
 }
