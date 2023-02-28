@@ -82,7 +82,7 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
             undoInsert = 0;
             File.vect[Screen.cursorLine] = currentLine.substr(0, Screen.cursorChar);
             File.vect.insert(File.vect.begin() + Screen.cursorLine + 1, currentLine.substr(Screen.cursorChar));
-            Cursor.row++;
+            if (!(Cursor.row >= Screen.verticalSize)) { Cursor.row++; }
             Screen.cursorLine++;
             Cursor.column = Cursor.offset;
             Screen.cursorChar = 0;
@@ -148,8 +148,12 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, lsp &Lsp, stru
         //  Do not move the terminal's cursor "out of bounds" when scrolling
         //  downwards, or it will not move up again when scrolling back up.
         //  Check if it's at the bottom and don't move it if it is
+        if (!(Screen.cursorLine == (int) File.vect.size() - 1)) {
+            Screen.cursorLine++;
+        } else {
+            Cursor.row--;
+        }
         if (!(Cursor.row >= Screen.verticalSize)) { Cursor.row += 1; }
-        Screen.cursorLine += 1;
 
     } else if (c == 'k') { //  Cursor up
         //  Check if the cursor is at the topline to prevent you from
