@@ -15,7 +15,8 @@ enum mode {
 
 struct undoInstruction {
     std::string text;
-    int index, line, action;
+    int index, line, cursorLine, action;
+    int topLine, bottomLine;
 };
 
 

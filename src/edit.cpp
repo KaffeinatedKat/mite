@@ -115,6 +115,9 @@ int edit::insertMode(file &File, screen &Screen, cursor &Cursor, popup &Popup, c
     //  undo stack.
     Undo.line = Screen.cursorLine;
     Undo.action = undoInsert;
+    Undo.cursorLine = Cursor.row;
+    Undo.topLine = Screen.topLine;
+    Undo.bottomLine = Screen.bottomLine;
 
     //  If the undo index is not at the end of the stack, remove everything 
     //  under it to prevent breaking the text. Otherwise you can undo into
@@ -249,9 +252,11 @@ void edit::undo(file &File, screen &Screen, cursor &Cursor) {
     undoInstruction Undo = undoStack[undoIndex];
     std::string lineBegin = File.vect[Undo.line].substr(0, Undo.index);
     std::string lineEnd = File.vect[Undo.line].substr(Undo.index);
-    Cursor.row = Undo.line + 1;
-    Cursor.column = Cursor.offset + Undo.index;
-    Screen.cursorLine = Cursor.row - 1;
+    Cursor.row = Undo.cursorLine;
+    Cursor.column = Cursor.offset + Undo.index + 1;
+    Screen.cursorLine = Undo.line;
+    Screen.topLine = Undo.topLine;
+    Screen.bottomLine = Undo.bottomLine;
 
     //  FIXME: this doesnt do anything?
     if (Undo.action == 1) {  //  Insert action
