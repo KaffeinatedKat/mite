@@ -2,13 +2,18 @@
 #include <cstdio>
 #include <stdio.h>
 #include <iostream>
-#include <unistd.h>
-#include <termios.h>
-#include <poll.h>
 #include <csignal>
 #include <thread>
 #include <filesystem>
 #include <iostream>
+
+#ifdef WINDOWS
+#include <conio.h>
+#else
+#include <unistd.h>
+#include <poll.h>
+#include <termios.h>
+#endif
 
 #include "file.hpp"
 #include "command.hpp"
@@ -24,6 +29,10 @@
 #define FDS 1
 #endif
 
+#ifdef WINDOWS
+void cook() {}
+void uncook() {}
+#else
 struct winsize size;
 struct termios raw;
 struct termios orig;
@@ -41,6 +50,7 @@ void uncook() {
 void cook() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig);
 }
+#endif
 
 void quit(lsp &Lsp) {
     Lsp.exit();
