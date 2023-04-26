@@ -93,6 +93,11 @@ int main(int argc, char *argv[]) {
     Lsp.didOpen(File);
 #endif 
 
+#ifdef WINDOWS
+    while (true) {
+        printf("Windows");
+    }
+#else
     while ((ready = poll(pfds, FDS, -1)) > 0) {
         if (pfds[0].revents & POLLIN) { //  User has typed
             read(STDIN_FILENO, &c, 1);
@@ -125,5 +130,6 @@ int main(int argc, char *argv[]) {
             Lsp.parseResponse(File, Screen, Cursor, Popup, Mode, Lsp.readJson());
         }
     }
+#endif
 }
 

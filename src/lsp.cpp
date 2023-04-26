@@ -351,7 +351,7 @@ char* lsp::readJson() {
 }
 void lsp::initialize() {}
 void lsp::exit() {}
-void lsp::didOpen(file &, std::string) {}
+void lsp::didOpen(file &) {}
 void lsp::didChange(file &, screen &, char) {}
 void lsp::completion(file &, screen &) {}
 void lsp::parseResponse(file &, screen &, cursor &, popup &, int, char*) {}
