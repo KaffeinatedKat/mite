@@ -25,11 +25,15 @@ if(CMAKE_BUILD_TYPE STREQUAL "debug")
 elseif(CMAKE_BUILD_TYPE STREQUAL "release")
     target_compile_options(mite PRIVATE -O2 -flto=thin)
 elseif(CMAKE_BUILD_TYPE STREQUAL "windows")
-    target_compile_options(mite PRIVATE -DWINDOWS)
+    target_compile_options(mite PRIVATE -DWINDOWS -DNO_LSP)
 endif()
 
+# nlohmann json
+FetchContent_Declare(json URL https://github.com/nlohmann/json/archive/refs/tags/v3.11.0.tar.gz)
+FetchContent_MakeAvailable(json)
 
-target_link_libraries(mite PRIVATE ${LIB})
+
+target_link_libraries(mite PRIVATE ${LIB} nlohmann_json::nlohmann_json)
 
 add_custom_target(format COMMAND clang-format -i ${SRC} ${HEADERS})
 

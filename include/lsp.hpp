@@ -5,14 +5,18 @@
 #include <cstdlib>
 #include <filesystem>
 #include <stdlib.h>
-#include <unistd.h>
 #include <mutex>
 #include <sys/types.h>
-#include <poll.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <string>
+
+#ifdef WINDOWS
+#else
+#include <poll.h>
+#include <unistd.h>
+#endif
 
 #include "screen.hpp"
 #include "file.hpp"
