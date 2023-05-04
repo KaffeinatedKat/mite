@@ -44,3 +44,12 @@ mite uses bindings identical to vim
 `:q` to exit
 
 `:wq` to write and exit
+
+## Screenshots
+
+![Screenshot](images/mite_file.png)
+
+![Screenshot](images/mite_lsp.png)
+
+![Screenshot](images/mite_tree_sitter.png)
+(please note that tree-sitter is not fully functional)
