@@ -11,6 +11,7 @@
 #include <rapidjson/document.h>
 #include <rapidjson/prettywriter.h>
 #include <string>
+#include <algorithm>
 
 #ifdef WINDOWS
 #else

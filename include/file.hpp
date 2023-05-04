@@ -21,6 +21,7 @@ struct error {
 struct file {
     std::map<int, error> errMap;
     std::vector<std::string> vect;
+    std::vector<int> vectIndicies;
     std::string filePath, string, languageId;
     std::string languageServer = "NONE";
 

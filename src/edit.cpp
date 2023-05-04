@@ -136,11 +136,13 @@ int edit::commandMode(file &File, screen &Screen, cursor &Cursor, lsp &Lsp, stru
     int retVal = 0;
 
     if (c == 'i') { //  Insert mode
+        Screen.clearAnnotations();
         Mode = insert; 
 
     } else if (c == 'a') {
         Cursor.column++;
         Screen.cursorChar++;
+        Screen.clearAnnotations();
         Mode = insert;
 
     } else if (c == 'x') { //  Delete char at current index

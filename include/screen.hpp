@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <algorithm>
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -9,6 +10,15 @@
 #include "file.hpp"
 #include "config.hpp"
 
+struct annotations {
+    std::string first;
+    std::string last;
+    std::string errMsg;
+    std::string errColor;
+    int start;
+    int end;
+    bool localIndex;
+};
 
 struct cursor {
     std::string cursors[2] = {"\033[2 q", "\033[6 q"};
@@ -35,6 +45,7 @@ struct popup {
 
 
 struct screen {
+    std::map<int, std::vector<annotations>> fileAnnotations;
     std::string modes[2] = {"", "-- INSERT -- "};
     std::string cmdLine;
     int verticalSize, horizontalSize, bottomLine, rightLine;
@@ -46,4 +57,6 @@ struct screen {
     void print(file, int);
 
     void init(winsize);
+
+    void clearAnnotations();
 };

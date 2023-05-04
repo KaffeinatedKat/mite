@@ -12,14 +12,12 @@ enum mode {
     insert = 1
 };
 
-enum undo {
-    NEWLINE,
-    REMOVELINE,
+enum {
+    DELETE,
     INSERT,
-    DELETE
+    NEWLINE,
+    REMOVELINE
 };
-
-
 
 struct undoInstruction {
     std::string text;

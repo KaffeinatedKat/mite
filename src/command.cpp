@@ -72,6 +72,8 @@ int command::get(screen &Screen, cursor &Cursor, std::string &cmd) {
 
 
 void command::execute(file &File, screen &Screen, lsp &Lsp, std::string command) {
+    //  FIXME: do not exit on 'q' if the file has been modified and
+    //  not saved, 'q!' to override 
     if (command == "w") {
         File.writeFile();
         Screen.cmdLine = "File hath been wroteth";

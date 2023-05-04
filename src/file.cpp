@@ -6,6 +6,7 @@
 std::string file::openFile(std::string path) {
     std::string line;
     std::string retVal = "";
+    int index = 0;
     char cwd[PATH_MAX];
 
     if (getcwd(cwd, sizeof(cwd)) == NULL) {
@@ -37,9 +38,15 @@ std::string file::openFile(std::string path) {
 
     std::ifstream f(filePath);
     vect.clear();
+    vectIndicies.clear();
     getLangId();
 
+    vectIndicies.push_back(0);
+
     while (getline(f, line)) {
+        index += (int) line.length() + 2;
+        vectIndicies.push_back(index);
+        printf("[%d]\n", index);
         vect.push_back(line);
     }
 

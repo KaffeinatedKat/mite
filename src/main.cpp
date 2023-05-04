@@ -20,6 +20,7 @@
 #include "edit.hpp"
 #include "screen.hpp"
 #include "lsp.hpp"
+//#include "tree_sitter.hpp"
 
 #define FDS 2
 
@@ -81,14 +82,23 @@ int main(int argc, char *argv[]) {
     struct::command Cmd;
     popup Popup;
     lsp Lsp;
+    //tree_sitter TS;
     Mode = command;
 
     signal(SIGINT, ctrlc);
     Screen.cmdLine = File.openFile(std::string(argv[1]));
     File.toString();
     Screen.init(size);
+
+    //TS.language();
+    //TS.buildTree(File);
+    //TS.highlight(File, Screen);
+
     Screen.print(File, Mode);
+
+
     Cursor.move();
+
     Popup.listIndex = 1;
     std::fflush(stdout);
 

@@ -3,9 +3,9 @@ HEADER_ROOT := include
 SRC := $(shell fd -e cpp . $(SRC_ROOT))
 HEADERS := $(shell fd -e hpp . $(HEADER_ROOT))
 OBJ := $(SRC:%.cpp=%.o)
-WARNINGS := -Wall -Wextra -Wpedantic -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn -Wsuggest-attribute=cold -Walloca -Wduplicated-branches -Wduplicated-cond -Wfloat-equal -Wlarger-than=4KiB -Wpointer-arith
+WARNINGS := -Wall -Wextra -Wpedantic -Walloca -Wfloat-equal -Wlarger-than=4KiB -Wpointer-arith
 OUT ?= mite
-CXXFLAGS += -std=c++17 -pipe
+CXXFLAGS += -std=c++20 -pipe
 INCLUDE := -Iinclude
 LIB :=
 
@@ -14,7 +14,7 @@ all: $(OUT) compile_flags.txt
 .DEFAULT_GOAL = debug
 
 debug: CXX = g++
-debug: CXXFLAGS += -Og -ggdb3 -DDEBUG
+debug: CXXFLAGS += -Og -ggdb3 -DDEBUG -ltree-sitter -ltree-sitter-cpp
 debug: all
 
 analyze: CXX = g++
@@ -23,6 +23,7 @@ analyze: debug
 
 release: CXX = clang++
 release: CXXFLAGS += -O2 -flto=thin
+release: clean
 release: all
 
 minimal: CXXFLAGS += -DNO_LSP

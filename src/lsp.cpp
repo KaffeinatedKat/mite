@@ -1,5 +1,6 @@
 #include "lsp.hpp"
 #include "config.hpp"
+#include "screen.hpp"
 
 #ifndef NO_LSP
 
@@ -303,25 +304,39 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 
     //  (Diagnostic)/(Error responce), parse items and create error lines
     } else if (responseJson["method"].IsString() && strcmp(responseJson["method"].GetString(), "textDocument/publishDiagnostics") == 0) {
-        struct error Err;
         std::string currentLine;
 
 #ifdef DEBUG
-        printf("%s\n\n\n\n", sb.GetString());
+        printf("%s\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n", sb.GetString());
 #endif
+        Screen.clearAnnotations();
 
         for (Value::ConstValueIterator it = responseJson["params"]["diagnostics"].Begin(); it != responseJson["params"]["diagnostics"].End(); ++it) {
             const Value& issue = *it;
+            annotations Highlights;
 
             if (issue["tags"].IsArray() == 1) {
                 color = YELLOW;
             }
 
-            Err.line = issue["range"]["start"]["line"].GetInt();
-            currentLine = File.vect[Err.line];
-            Err.lineText = File.vect[Err.line];
-            Err.start = issue["range"]["start"]["character"].GetInt();
-            Err.end = issue["range"]["end"]["character"].GetInt();
+            Highlights.localIndex = true;
+            Highlights.first = "\x1b[4m";
+            Highlights.last = RESET;
+            Highlights.start = issue["range"]["start"]["character"].GetInt();
+            Highlights.end = issue["range"]["end"]["character"].GetInt();
+            Highlights.errMsg = issue["message"].GetString();
+            Highlights.errColor = color;
+
+            std::replace( Highlights.errMsg.begin(), Highlights.errMsg.end(), '\n', ' '); // replace all 'x' to 'y'
+
+            if (issue["range"]["start"]["line"].GetInt() == issue["range"]["end"]["line"].GetInt()) {
+                Screen.fileAnnotations[issue["range"]["start"]["line"].GetInt() + 1].push_back(Highlights);
+            }
+
+            //currentLine = File.vect[Err.line];
+            //Err.lineText = File.vect[Err.line];
+            //Err.start = issue["range"]["start"]["character"].GetInt();
+            //Err.end = issue["range"]["end"]["character"].GetInt();
 
             //Err.lineText = currentLine.substr(0, start) + "\x1b[9m" + currentLine.substr(start, end - start) + "\x1b[0m" + currentLine.substr(end) + "\x1b[2;3m  " + issue["message"].GetString();
 
@@ -329,10 +344,10 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
             //Err.lineText.insert(Err.start, "\033[9m");
             //Err.lineText.insert(Err.end + 4, "\033[0m");
         
-            Err.lineText.append("  \x1b[1m");
-            Err.lineText.append(color);
-            Err.lineText.append(issue["message"].GetString());
-            File.errMap[Err.line] = Err;
+            //Err.lineText.append("  \x1b[1m");
+            //Err.lineText.append(color);
+            //Err.lineText.append(issue["message"].GetString());
+            //File.errMap[Err.line] = Err;
             
         }
 
@@ -346,7 +361,7 @@ void lsp::parseResponse(file &File, screen &Screen, cursor &Cursor, popup &Popup
 
 void lsp::start(file) {}
 char* lsp::readJson() {
-    char* retVal;
+    char* retVal = (char*) "minimal build";
     return retVal;
 }
 void lsp::initialize() {}
