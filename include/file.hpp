@@ -1,8 +1,5 @@
 #pragma once
-#ifdef WINDOWS
-#else
 #include <unistd.h>
-#endif
 #include <string>
 #include <vector>
 #include <map>

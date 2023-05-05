@@ -12,12 +12,8 @@
 #include <rapidjson/prettywriter.h>
 #include <string>
 #include <algorithm>
-
-#ifdef WINDOWS
-#else
 #include <poll.h>
 #include <unistd.h>
-#endif
 
 #include "screen.hpp"
 #include "file.hpp"

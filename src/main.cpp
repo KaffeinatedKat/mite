@@ -6,21 +6,16 @@
 #include <thread>
 #include <filesystem>
 #include <iostream>
-
-#ifdef WINDOWS
-#include <conio.h>
-#else
 #include <unistd.h>
 #include <poll.h>
 #include <termios.h>
-#endif
 
 #include "file.hpp"
 #include "command.hpp"
 #include "edit.hpp"
 #include "screen.hpp"
 #include "lsp.hpp"
-//#include "tree_sitter.hpp"
+#include "tree_sitter.hpp"
 
 #define FDS 2
 
@@ -30,10 +25,6 @@
 #define FDS 1
 #endif
 
-#ifdef WINDOWS
-void cook() {}
-void uncook() {}
-#else
 struct winsize size;
 struct termios raw;
 struct termios orig;
@@ -51,7 +42,6 @@ void uncook() {
 void cook() {
     tcsetattr(STDIN_FILENO, TCSAFLUSH, &orig);
 }
-#endif
 
 void quit(lsp &Lsp) {
     Lsp.exit();
@@ -82,7 +72,7 @@ int main(int argc, char *argv[]) {
     struct::command Cmd;
     popup Popup;
     lsp Lsp;
-    //tree_sitter TS;
+    tree_sitter TS;
     Mode = command;
 
     signal(SIGINT, ctrlc);
@@ -90,9 +80,11 @@ int main(int argc, char *argv[]) {
     File.toString();
     Screen.init(size);
 
-    //TS.language();
-    //TS.buildTree(File);
-    //TS.highlight(File, Screen);
+#ifndef NO_TS
+    TS.language();
+    TS.buildTree(File);
+    TS.highlight(File, Screen);
+#endif
 
     Screen.print(File, Mode);
 
@@ -113,11 +105,6 @@ int main(int argc, char *argv[]) {
     Lsp.didOpen(File);
 #endif 
 
-#ifdef WINDOWS
-    while (true) {
-        printf("Windows");
-    }
-#else
     while ((ready = poll(pfds, FDS, -1)) > 0) {
         if (pfds[0].revents & POLLIN) { //  User has typed
             read(STDIN_FILENO, &c, 1);
@@ -150,6 +137,5 @@ int main(int argc, char *argv[]) {
             Lsp.parseResponse(File, Screen, Cursor, Popup, Mode, Lsp.readJson());
         }
     }
-#endif
 }
 

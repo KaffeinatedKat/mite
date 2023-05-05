@@ -22,12 +22,17 @@ analyze: CXXFLAGS += -fanalyzer
 analyze: debug
 
 release: CXX = clang++
-release: CXXFLAGS += -O2 -flto=thin
+release: CXXFLAGS += -O2 -flto=thin -DNO_TS
 release: clean
 release: all
 
-minimal: CXXFLAGS += -DNO_LSP
+minimal: CXXFLAGS += -DNO_LSP -DNO_TS
 minimal: release
+
+tree-sitter: CXX = clang++
+tree-sitter: CXXFLAGS += -O2 -flto=thin -ltree-sitter -ltree-sitter-cpp
+tree-sitter: clean
+tree-sitter: all
 
 format: $(SRC) $(HEADERS)
 	clang-format -i $(SRC) $(HEADERS)

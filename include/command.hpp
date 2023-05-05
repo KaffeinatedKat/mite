@@ -1,11 +1,8 @@
 #pragma once
 #include <string>
 
-#ifdef WINDOWS
-#else
 #include <unistd.h>
 #include <termios.h>
-#endif
 
 #include "screen.hpp"
 #include "lsp.hpp"

@@ -1,4 +1,6 @@
 #include "tree_sitter.hpp"
+
+#ifndef NO_TS
 #include <tree_sitter/api.h>
 
 extern "C" {
@@ -73,3 +75,10 @@ void tree_sitter::highlight(file &File, screen &Screen) {
         }
     }
 }
+#else
+
+void tree_sitter::highlight(file &, screen &) {}
+void tree_sitter::buildTree(file &) {}
+void tree_sitter::language() {}
+
+#endif
